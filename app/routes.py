@@ -1,21 +1,13 @@
-from .models import auth_creds_resource, token_resource, greetings
+from .models import auth_creds_resource, token_resource, object_info_resource, url_resource
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required
 from app import api, ldap_manager
 from flask_jwt_extended import get_jti
 from app.config import  ACCESS_EXPIRES
 from .redis_utils import revoked_store
-from flask import request
+from .s3_utils import S3Operations
 
-@api.route('/greeting')
-class Greeting(Resource):
-    def get(self):
-        return api.payload
-
-    @api.expect(greetings, validate=True)
-    def post(self):
-       return  api.payload['username']
 
 
 @api.route('/token')
@@ -56,3 +48,14 @@ class Token(Resource):
         access_jti = get_jti(encoded_token=api.payload['access_token'])
         revoked_store.set(access_jti, 'true', ACCESS_EXPIRES * 1.2)
         return '', 204
+
+@api.route('/fetch_url')
+class FetchUrl(Resource):
+    #don't forget to add a token
+    @api.expect(object_info_resource)
+    @api.marshal_with(url_resource)
+   # @jwt_required
+    def post(self):
+        # access the s3 bucket
+        presigned_url = S3Operations().generate_presigned_url(api.payload['Bucket'], api.payload['Key'])
+        return presigned_url
