@@ -1,9 +1,8 @@
 from .models import auth_creds_resource, token_resource, object_info_resource, url_resource
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
-from flask_jwt_extended import create_access_token, jwt_required
-from app import api, ldap_manager
-from flask_jwt_extended import get_jti
+from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
+from app import api, ldap_manager, jwt
 from app.config import  ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
@@ -54,8 +53,16 @@ class FetchUrl(Resource):
     #don't forget to add a token
     @api.expect(object_info_resource)
     @api.marshal_with(url_resource)
-   # @jwt_required
+    @jwt_required
     def post(self):
         # access the s3 bucket
-        presigned_url = S3Operations().generate_presigned_url(api.payload['Bucket'], api.payload['Key'])
+        presigned_url = S3Operations.generate_presigned_url(api.payload['Bucket'], api.payload['Key'])
         return presigned_url
+
+@jwt.token_in_blacklist_loader
+def check_if_token_is_revoked(decrypted_token):
+    jti = decrypted_token['jti']
+    entry = revoked_store.get(jti)
+    if entry is None:
+        return True
+    return entry == 'true'

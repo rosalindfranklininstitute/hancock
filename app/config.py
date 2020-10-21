@@ -16,8 +16,8 @@ class Config(object):
     #JWT
     JWT_ACCESS_TOKEN_EXPIRES = ACCESS_EXPIRES
     JWT_REFRESH_TOKEN_EXPIRES = REFRESH_EXPIRES
-    JWT_BLACKLIST_ENABLED = True
-    JWT_BLACKLIST_TOKEN_CHECKS = ['access']
+    # JWT_BLACKLIST_ENABLED = False
+    # JWT_BLACKLIST_TOKEN_CHECKS = ['access']
 
     #Redis
     HANCOCK_REDIS_HOST = os.environ.get('HANCOCK_REDIS_HOST')
@@ -37,3 +37,5 @@ class Config(object):
     S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')
     ACCESS_KEY = os.environ.get('ACCESS_KEY')
     SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
+
+
