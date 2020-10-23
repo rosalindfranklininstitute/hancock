@@ -1,9 +1,8 @@
-image: continuumio/miniconda3
+image: miniconda3
 
 before_script:
   - conda update -c conda-forge --all -y
   - pip install -r requirements.txt
-  - pip install python-dotenv
 
 test:
     script:
