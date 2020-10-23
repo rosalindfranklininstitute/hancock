@@ -2,10 +2,11 @@ from .models import auth_creds_resource, token_resource, object_info_resource, u
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from app import api, ldap_manager, jwt
-from app.config import  ACCESS_EXPIRES
+from hancock import api, ldap_manager, jwt, app
+from hancock.config import  ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
+import boto3
 
 
 
@@ -55,9 +56,9 @@ class FetchUrl(Resource):
     @api.marshal_with(url_resource)
     @jwt_required
     def post(self):
-        # access the s3 bucket
-        presigned_url = S3Operations.generate_presigned_url(api.payload['Bucket'], api.payload['Key'])
-        return presigned_url
+      response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
+
+      return response
 
 @jwt.token_in_blacklist_loader
 def check_if_token_is_revoked(decrypted_token):

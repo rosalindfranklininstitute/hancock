@@ -1,5 +1,5 @@
 from flask import Flask
-from app.config import Config
+from hancock.config import Config
 from flask_restx import Api
 from flask_ldap3_login import LDAP3LoginManager
 from flask_jwt_extended import JWTManager
@@ -16,4 +16,4 @@ api = Api(app, version='0.1', title='Hancock API',
 ldap_manager = LDAP3LoginManager(app)
 jwt = JWTManager(app)
 
-from app import routes, models
+from hancock import routes, models

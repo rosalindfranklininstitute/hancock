@@ -37,5 +37,5 @@ class Config(object):
     S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')
     ACCESS_KEY = os.environ.get('ACCESS_KEY')
     SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
-
+    CERTIFICATE_VERIFY= True
 

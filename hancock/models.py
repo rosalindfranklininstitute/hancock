@@ -1,4 +1,4 @@
-from app import api
+from hancock import api
 from flask_restx import fields
 
 

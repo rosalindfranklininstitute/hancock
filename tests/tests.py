@@ -1,10 +1,11 @@
 from unittest import TestCase
-from app import app, api
+from hancock import app, api
 from flask_jwt_extended import jwt_required
-from flask_restx import Api, Resource, fields, abort
+from flask_restx import Resource
 import boto3
-from moto import mock_s3
-from app.s3_utils import S3Operations
+import os
+from hancock.s3_utils import S3Operations
+from hancock.config import Config
 
 TEST_USERNAME = 'zoidberg'
 TEST_PASSWORD = 'zoidberg'
@@ -22,7 +23,7 @@ def make_headers(jwt):
     return {'Authorization': 'Bearer {}'.format(jwt)}
 
 
-class TestConfig:
+class TestConfig(Config):
     HANCOCK_REDIS_HOST = '127.0.0.1'
     LDAP_HOST = 'localhost'
     LDAP_PORT = 389
@@ -35,14 +36,16 @@ class TestConfig:
     LDAP_USER_SEARCH_SCOPE = 'SUBTREE'
     LDAP_USER_RDN_ATTR = 'cn'
     LDAP_USER_LOGIN_ATTR = 'uid'
-    S3_ENDPOINT_URL = 'https://s3.amazonaws.com'
-    ACCESS_KEY = 'testing'
-    SECRET_ACCESS_KEY = 'testing'
+    S3_ENDPOINT_URL = 'https://ceph-dev-gw3.gridpp.rl.ac.uk'
+    ACCESS_KEY = 'E03XRPZ4MZLRJJXZE6JO'
+    SECRET_ACCESS_KEY = 'Bxov4Jn0nannMhkVw8fI9HoFvMEdDSiO1xTudhCY'
+    CERTIFICATE_VERIFY = False
 
 
 class LoginTest(TestCase):
     def setUp(self):
-        self.client = app.test_client(TestConfig)
+        app.config.from_object(TestConfig)
+        self.client = app.test_client()
 
     def test_good_login(self):
         # login and get token
@@ -86,27 +89,36 @@ class LoginTest(TestCase):
 
 class RetrieveUrlTest(TestCase):
     def setUp(self) -> None:
-        self.client = app.test_client(TestConfig)
+        app.config.from_object(TestConfig)
+        self.client = app.test_client()
+        self.s3 = boto3.client('s3', **S3Operations.client_options())
+        self.s3.create_bucket(Bucket='rfi-test-bucket-abc')
+        self.s3.put_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
 
-    @mock_s3
+
+    def tearDown(self) -> None:
+        self.s3.delete_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
+        self.s3.delete_bucket(Bucket='rfi-test-bucket-abc')
+
+
     def test_successful_retrieval(self):
-        self.s3 = boto3.client('s3')
-        print(self.s3.meta.endpoint_url)
-        self.s3.create_bucket(Bucket='rfi-test-bucket')
-        self.s3.put_object(Bucket='rfi-test-bucket', Key='myobj.txt')
+        response =  self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
+        token = response.get_json()['access_token']
+        response = self.client.post('/api/fetch_url',
+                                    json=dict(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt'),
+                                    headers=make_headers(token))
 
-        response = S3Operations.generate_presigned_url(Bucket='rfi-test-bucket',
-                                                         Key='myobj.txt',
-                                                         Expiration=15)
-        self.assertNotEqual(response, None)
-        self.assertTrue('http' in response)
+        self.assertNotEqual(response.status_code, '200')
+        self.assertTrue('http' in response.json['presigned_url'])
 
 
-    def test_cannot_connect(self):
-       pass
-    # 
-    # def cannotFindObj(self):
-    #     pass
-    # 
-    # def authorisationUnsuccessful(self):
-    #     pass
+    def test_bad_retrieval(self):
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
+        token = response.get_json()['access_token']
+        response = self.client.post('/api/fetch_url',
+                                    json=dict(Bucket='rfi-test-bucket-485', Key='notmyfileobj.txt'),
+                                    headers=make_headers(token))
+        print(response)
+        self.assertEqual(response.status_code, 404)
+
+

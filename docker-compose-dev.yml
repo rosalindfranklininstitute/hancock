@@ -1,0 +1,32 @@
+version: '3'
+services:
+    redis:
+        image: redis
+    flask:
+        image: webapp-flask
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command:
+            - uwsgi
+            - --ini
+            - app.ini
+            - --http-socket
+            - 0.0.0.0:5000
+        depends_on:
+            - redis
+        environment:
+            FLASK_ENV: development
+            HANCOCK_REDIS_HOSTNAME: redis
+        env_file:
+            # create this file yourself!
+            - .env
+
+    ldap:
+        image: rroemhild/test-openldap
+        ports:
+            - 389:389
+
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
