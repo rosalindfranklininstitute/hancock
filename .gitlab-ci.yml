@@ -1,4 +1,4 @@
-image: continuum/miniconda3
+image: continuumio/miniconda3
 
 before_script:
   - conda update -c conda-forge --all -y
