@@ -9,7 +9,7 @@ test:
     - docker
   before_script:
     - apt-get update
-    - apt install build-essential --all -y
+    - apt install build-essential  -y
     - conda update -c conda-forge --all -y
     - pip install -r requirements.txt
   script:
