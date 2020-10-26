@@ -1,8 +1,13 @@
-image: miniconda3
+image: continuum/miniconda3
 
 before_script:
   - conda update -c conda-forge --all -y
   - pip install -r requirements.txt
+
+job:
+  services:
+    - rroemhild/test-openldap:latest
+    - redis:latest
 
 test:
     script:
