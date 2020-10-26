@@ -24,14 +24,15 @@ class Config(object):
 
     # LDAP
     # using docker container rroemhild/test-openldap to provide ldap service
-    LDAP_HOST = 'localhost'
-    LDAP_PORT = 389
-    LDAP_BASE_DN= 'dc=planetexpress,dc=com'
-    LDAP_USER_DN = 'ou=people'
-    LDAP_USER_RDN_ATTR = 'cn'
-    LDAP_USER_LOGIN_ATTR = 'uid'
-    LDAP_BIND_DN = 'cn=admin'
-    LDAP_BIND_USER_PASSWORD = 'GoodNewsEveryone'
+    LDAP_HOST = os.environ.get('LDAP_HOST')
+    LDAP_PORT = int(os.environ.get('LDAP_PORT'))
+    LDAP_USE_SSL = True
+    LDAP_BASE_DN = os.environ.get('LDAP_BASE_DN')
+    LDAP_USER_LOGIN_ATTR = os.environ.get('LDAP_USER_LOGIN_ATTR')
+    LDAP_USER_OBJECT_FILTER = os.environ.get('LDAP_USER_OBJECT_FILTER')
+    LDAP_BIND_USER_DN = os.environ.get('LDAP_BIND_USER_DN')
+    LDAP_BIND_USER_PASSWORD = os.environ.get('LDAP_BIND_USER_PASSWORD')
+    LDAP_USER_SEARCH_SCOPE = os.environ.get('LDAP_USER_SEARCH_SCOPE')
 
     #S3
     S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')

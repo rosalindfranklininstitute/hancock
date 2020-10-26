@@ -6,9 +6,6 @@ from hancock import api, ldap_manager, jwt, app
 from hancock.config import  ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
-import boto3
-
-
 
 @api.route('/token')
 class Token(Resource):

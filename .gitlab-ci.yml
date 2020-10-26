@@ -1,13 +1,15 @@
 image: continuumio/miniconda3
 
-before_script:
-  - conda update -c conda-forge --all -y
-  - pip install -r requirements.txt
-
 services:
     - rroemhild/test-openldap:latest
     - redis:latest
 
 test:
-    script:
+  tags:
+    - docker
+  before_script:
+    - sudo apt install build-essentials
+    - conda update -c conda-forge --all -y
+    - pip install -r requirements.txt
+  script:
      - python3 -m unittest discover
