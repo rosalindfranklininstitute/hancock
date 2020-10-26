@@ -8,7 +8,7 @@ test:
   tags:
     - docker
   before_script:
-    - sudo apt install build-essentials
+    - apt install build-essentials
     - conda update -c conda-forge --all -y
     - pip install -r requirements.txt
   script:
