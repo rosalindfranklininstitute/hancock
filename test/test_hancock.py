@@ -3,7 +3,7 @@ from hancock import app, api
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
-import os
+import unittest
 from hancock.s3_utils import S3Operations
 from hancock.config import Config
 
@@ -123,3 +123,5 @@ class RetrieveUrlTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
+if __name__ == '__main__':
+    unittest.main()
