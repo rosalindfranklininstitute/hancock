@@ -4,6 +4,5 @@ flask
 flask-jwt-extended
 flask-ldap3-login
 flask-restx
-uwsgi
 python-dotenv
 redis
