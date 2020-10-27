@@ -6,6 +6,7 @@ import boto3
 import unittest
 from hancock.s3_utils import S3Operations
 from hancock.config import Config
+import os
 
 TEST_USERNAME = 'zoidberg'
 TEST_PASSWORD = 'zoidberg'
@@ -37,8 +38,8 @@ class TestConfig(Config):
     LDAP_USER_RDN_ATTR = 'cn'
     LDAP_USER_LOGIN_ATTR = 'uid'
     S3_ENDPOINT_URL = 'https://ceph-dev-gw3.gridpp.rl.ac.uk'
-    ACCESS_KEY = 'E03XRPZ4MZLRJJXZE6JO'
-    SECRET_ACCESS_KEY = 'Bxov4Jn0nannMhkVw8fI9HoFvMEdDSiO1xTudhCY'
+    ACCESS_KEY = os.environ.get('ACCESS_KEY_DEV')
+    SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY_DEV')
     CERTIFICATE_VERIFY = False
 
 
