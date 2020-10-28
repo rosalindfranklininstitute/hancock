@@ -2,10 +2,11 @@ from .models import auth_creds_resource, token_resource, object_info_resource, u
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, ldap_manager, jwt, app
+from hancock import api, ldap_manager, jwt
 from hancock.config import  ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
+
 
 @api.route('/token')
 class Token(Resource):
@@ -64,3 +65,6 @@ def check_if_token_is_revoked(decrypted_token):
     if entry is None:
         return True
     return entry == 'true'
+
+
+
