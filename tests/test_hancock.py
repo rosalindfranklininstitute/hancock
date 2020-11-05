@@ -5,7 +5,6 @@ from flask_restx import Resource
 import boto3
 import unittest
 from hancock.s3_utils import S3Operations
-from hancock.config import Config
 import os
 
 TEST_USERNAME = os.environ.get('TEST_USERNAME')
@@ -36,34 +35,34 @@ class LoginTest(TestCase):
 
     def test_good_login(self):
         # login and get token
+        print('login')
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         self.assertEqual(response.status_code, 201)
         self.assertIn('access_token', response.get_json())
         token = response.get_json()['access_token']
-
+        print('access protected page')
         # use token for accessing protected page
         response = self.client.get('/api/protected', headers=make_headers(token))
         self.assertEqual(response.status_code, 200)
         self.assertIn('hello', response.get_json())
-
-        # # revoke token
-        # response = self.client.delete('/api/token', json=dict(access_token=token))
-        # self.assertEqual(response.status_code, 204)
-        #
-        # # confirm token has been revoked
-        # response = self.client.get('/api/protected', headers=make_headers(token))
-        # self.assertEqual(response.status_code,401)
-        #
-        # # revoke token again
-        # response = self.client.delete('/api/token', json=dict(access_token=token))
-        # self.assertEqual(response.status_code, 204)
-        #
-        # # confirm token has been revoked
-        # response = self.client.get('/api/protected', headers=make_headers(token))
-        # self.assertEqual(response.status_code, 401)
+        print("revoke token")
+        # revoke token
+        response = self.client.delete('/api/token', json=dict(access_token=token))
+        self.assertEqual(response.status_code, 204)
+        print('confirm token revoked')
+        # confirm token has been revoked
+        response = self.client.get('/api/protected', headers=make_headers(token))
+        self.assertEqual(response.status_code,500)
+        print('second revoke')
+        # revoke token again
+        response = self.client.delete('/api/token', json=dict(access_token=token))
+        self.assertEqual(response.status_code, 204)
+        print('confirm second revoke')
+        # confirm token has been revoked
+        response = self.client.get('/api/protected', headers=make_headers(token))
+        self.assertEqual(response.status_code, 500)
 
     def test_bad_login(self):
-        print('testing bad login')
         response = self.client.post('/api/token', json=dict(username='jaewjfpewqjfjpewp', password='jeawjfpfjewf'))
         self.assertEqual(response.status_code, 401)
 
