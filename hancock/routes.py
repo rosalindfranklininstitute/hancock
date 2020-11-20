@@ -8,6 +8,11 @@ from .redis_utils import revoked_store
 from .s3_utils import S3Operations
 
 
+@api.route('/ping')
+class Ping(Resource):
+    def get(self):
+        return {'hi':'there'}
+
 @api.route('/token')
 class Token(Resource):
     @api.expect(auth_creds_resource)

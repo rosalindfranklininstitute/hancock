@@ -21,12 +21,6 @@ services:
         env_file:
             # create this file yourself!
             - .env
-
-    ldap:
-        image: rroemhild/test-openldap
         ports:
-            - 389:389
-
-        volumes:
-            - "/var/run/docker.sock:/var/run/docker.sock:ro"
+            - "5000:5000"
 

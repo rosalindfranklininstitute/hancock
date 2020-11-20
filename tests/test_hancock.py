@@ -86,7 +86,6 @@ class RetrieveUrlTest(TestCase):
         self.s3.delete_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
         self.s3.delete_bucket(Bucket='rfi-test-bucket-abc')
 
-
     def test_successful_retrieval(self):
         response =  self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']

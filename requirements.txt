@@ -6,3 +6,4 @@ flask-ldap3-login
 flask-restx
 python-dotenv
 redis
+uwsgi
