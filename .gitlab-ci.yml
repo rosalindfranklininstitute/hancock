@@ -10,7 +10,7 @@ test:
     - conda init bash
     - source /root/.bashrc
     - conda env create -f environment.yml
-    - conda activate calamari
+    - conda activate hancock
   script:
     - python3 -m unittest tests/test_hancock.py
 
