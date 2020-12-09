@@ -12,5 +12,6 @@ test:
     - conda env create -f environment.yml
     - conda activate hancock
   script:
-    - python3 -m unittest tests/test_hancock.py
+      - nose2 -v --log-level DEBUG
+
 
