@@ -90,7 +90,7 @@ class RetrieveUrlTest(TestCase):
     def test_successful_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']
-        response = self.client.post('/api/fetchUrl',
+        response = self.client.post('/api/fetch_url',
                                     json=dict(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt'),
                                     headers=make_headers(token))
 

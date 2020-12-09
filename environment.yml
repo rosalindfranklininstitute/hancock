@@ -11,5 +11,5 @@ dependencies:
   - flask-restx
   - python-dotenv
   - redis
-  - nose
+  - nose2
   - uwsgi
