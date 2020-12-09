@@ -4,12 +4,15 @@ from hancock import app
 
 class S3Operations:
     @classmethod
-    def client_options(cls):
+    def client_options(cls, **kwargs):
         client_options = dict()
         client_options['endpoint_url'] = app.config['S3_ENDPOINT_URL']
         client_options['verify'] = app.config['CERTIFICATE_VERIFY']
         client_options['aws_access_key_id'] = app.config['ACCESS_KEY']
         client_options['aws_secret_access_key'] = app.config['SECRET_ACCESS_KEY']
+
+        for k, v in kwargs.items():
+            client_options[k] = v
         return client_options
 
     @classmethod

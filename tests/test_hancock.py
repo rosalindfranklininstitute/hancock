@@ -6,6 +6,8 @@ import boto3
 import unittest
 from hancock.s3_utils import S3Operations
 import os
+from unittest.mock import patch
+from hancock.redis_utils import revoked_store
 
 TEST_USERNAME = os.environ.get('TEST_USERNAME')
 TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
@@ -25,13 +27,12 @@ def make_headers(jwt):
 app.config['S3_ENDPOINT_URL']= os.environ.get('S3_ENDPOINT_URL_DEV')
 app.config['ACCESS_KEY'] = os.environ.get('ACCESS_KEY_DEV')
 app.config['SECRET_ACCESS_KEY'] = os.environ.get('SECRET_ACCESS_KEY_DEV')
-app.config['CERTIFICATE_VERIFY']= False
+app.config['CERTIFICATE_VERIFY'] = False
 
 
 class LoginTest(TestCase):
     def setUp(self):
         self.client = app.test_client()
-
 
     def test_good_login(self):
         # login and get token
@@ -77,7 +78,7 @@ class RetrieveUrlTest(TestCase):
     def setUp(self) -> None:
 
         self.client = app.test_client()
-        self.s3 = boto3.client('s3', **S3Operations.client_options())
+        self.s3 = boto3.client('s3', **S3Operations.client_options(use_ssl=True))
         self.s3.create_bucket(Bucket='rfi-test-bucket-abc')
         self.s3.put_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
 
@@ -87,9 +88,9 @@ class RetrieveUrlTest(TestCase):
         self.s3.delete_bucket(Bucket='rfi-test-bucket-abc')
 
     def test_successful_retrieval(self):
-        response =  self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']
-        response = self.client.post('/api/fetch_url',
+        response = self.client.post('/api/fetchUrl',
                                     json=dict(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt'),
                                     headers=make_headers(token))
 

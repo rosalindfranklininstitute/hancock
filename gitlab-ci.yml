@@ -1,0 +1,16 @@
+image: continuumio/miniconda3
+
+services:
+  - redis:latest
+
+test:
+  tags:
+    - docker
+  before_script:
+    - conda init bash
+    - source /root/.bashrc
+    - conda env create -f environment.yml
+    - conda activate calamari
+  script:
+    - python3 -m unittest tests/test_hancock.py
+
