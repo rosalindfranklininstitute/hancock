@@ -1,0 +1,17 @@
+image: continuumio/miniconda3
+
+services:
+  - redis:latest
+
+test:
+  tags:
+    - docker
+  before_script:
+    - conda init bash
+    - source /root/.bashrc
+    - conda env create -f environment.yml
+    - conda activate hancock
+  script:
+      - nose2 -v --log-level DEBUG
+
+
