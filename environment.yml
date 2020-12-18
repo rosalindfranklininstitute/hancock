@@ -13,3 +13,4 @@ dependencies:
   - redis-py
   - nose2
   - uwsgi
+  - mockredispy

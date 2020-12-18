@@ -6,8 +6,8 @@ import boto3
 import unittest
 from hancock.s3_utils import S3Operations
 import os
-from unittest.mock import patch
-from hancock.redis_utils import revoked_store
+
+#note: need to be on RAL VPN to use these accounts
 
 TEST_USERNAME = os.environ.get('TEST_USERNAME')
 TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
@@ -107,6 +107,3 @@ class RetrieveUrlTest(TestCase):
         print(response)
         self.assertEqual(response.status_code, 404)
 
-
-if __name__ == '__main__':
-    unittest.main()
