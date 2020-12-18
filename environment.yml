@@ -2,7 +2,7 @@ name: hancock
 channels:
   - conda-forge
 dependencies:
-  -  python=3.8
+  - python=3.8
   - boto3
   - botocore
   - flask
@@ -10,6 +10,6 @@ dependencies:
   - flask-ldap3-login
   - flask-restx
   - python-dotenv
-  - redis
+  - redis-py
   - nose2
   - uwsgi
