@@ -4,8 +4,8 @@ import requests
 import ast
 import json
 
-TEST_USERNAME = 'RFI Github'
-TEST_PASSWORD = '!xk8wa>cb4'
+TEST_USERNAME = os.environ.get('TEST_USERNAME')
+TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
 SCICAT_URL = 'http://localhost/api/v3/'
 HANCOCK_URL = 'http://localhost:5000/api/'
 
