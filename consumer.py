@@ -1,19 +1,24 @@
 #!/usr/bin/env python
-import pika, sys, os
+import pika
+import os
 import requests
 import ast
 import json
+import sys
+
 
 TEST_USERNAME = os.environ.get('TEST_USERNAME')
 TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
-SCICAT_URL = 'http://localhost/api/v3/'
-HANCOCK_URL = 'http://localhost:5000/api/'
+SCICAT_URL = os.environ.get('SCICAT_URL')
+HANCOCK_URL = os.environ.get('HANCOCK_URL')
+
+
 
 def make_headers(jwt):
     return {'Authorization': 'Bearer {}'.format(jwt)}
 
 def main():
-    parameters = pika.connection.URLParameters("amqp://consumer1:newpassword2@localhost:5672/")
+    parameters = pika.connection.URLParameters(os.environ.get('AMPQ_URI'))
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
@@ -22,9 +27,10 @@ def main():
         body = ast.literal_eval(body.decode())
         print("retrieving info from Scicat....")
         # get info from Scicat
-        r = requests.post(SCICAT_URL + 'Users/login', json=dict(username='ingestor', password='aman'))
-        scicat_token = r.json()['id']
+
         if body is not None:
+            r = requests.post(SCICAT_URL + 'Users/login', json=dict(username='ingestor', password='aman'))
+            scicat_token = r.json()['id']
             query = json.dumps({"where": {"pid": f"{body['datasetList'][0]['pid']}"}})
             r = requests.get(SCICAT_URL + "Datasets", params={"filter": query, "access_token": scicat_token})
             cat_entry = r.json()
