@@ -14,3 +14,5 @@ dependencies:
   - nose2
   - uwsgi
   - mockredispy
+  - requests
+  - pika
