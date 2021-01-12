@@ -23,5 +23,13 @@ services:
             - .env
         ports:
             - "5000:5000"
+    worker:
+        build:
+            context: .
+            dockerfile: ConsumerDockerfile
+        volumes:
+            - ./worker:/app
+        environment:
+            - PYTHONUNBUFFERED=1
 
 

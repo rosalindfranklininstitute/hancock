@@ -16,3 +16,4 @@ dependencies:
   - mockredispy
   - requests
   - pika
+  - logging
