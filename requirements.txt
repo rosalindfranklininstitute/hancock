@@ -7,3 +7,4 @@ flask-restx
 python-dotenv
 redis
 uwsgi
+requests

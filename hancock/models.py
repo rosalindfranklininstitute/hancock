@@ -16,5 +16,7 @@ object_info_resource = api.model('ObjectCredentials', {
     'Key': fields.String(description= 'path to object', required=True)
 })
 
-url_resource = api.model('Presigned_url', {'presigned_url': fields.String(description= "presigned url to download the data",
+url_resource = api.model('PresignedUrl', {'presigned_url': fields.String(description= "presigned url to download the data",
                                            required= True)})
+
+message_resource = api.model('AsynchronusMessage', {'async_message': fields.String(description ="message from rabbitMQ")})
