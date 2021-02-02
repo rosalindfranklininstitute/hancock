@@ -1,8 +1,10 @@
 import requests
 import json
+from hancock import app
 
 
-SCICAT_URL =
+SCICAT_URL = app.config['SCICAT_URL']
+
 def get_associated_payload(pid):
     try:
         r = requests.post(SCICAT_URL + 'Users/login', json=dict(username='ingestor', password='aman'))
