@@ -1,4 +1,0 @@
-logging
-python-dotenv
-pika
-requests

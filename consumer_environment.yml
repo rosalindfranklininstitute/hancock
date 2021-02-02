@@ -1,9 +1,0 @@
-name: consumer
-channels:
-  - conda-forge
-dependencies:
-  - python=3.8
-  - requests
-  - pika
-  - logging_exceptions
-  - python-dotenv
