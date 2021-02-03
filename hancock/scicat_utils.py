@@ -1,5 +1,6 @@
 import requests
 import json
+import logging
 from hancock import app
 
 
