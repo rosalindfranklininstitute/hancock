@@ -3,11 +3,10 @@ from hancock import app, api
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
-import unittest
 from hancock.s3_utils import S3Operations
 import os
+from moto import mock_s3
 
-#note: need to be on RAL VPN to use these accounts
 
 TEST_USERNAME = os.environ.get('TEST_USERNAME')
 TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
@@ -24,12 +23,6 @@ def make_headers(jwt):
     return {'Authorization': 'Bearer {}'.format(jwt)}
 
 
-app.config['S3_ENDPOINT_URL']= os.environ.get('S3_ENDPOINT_URL_DEV')
-app.config['ACCESS_KEY'] = os.environ.get('ACCESS_KEY_DEV')
-app.config['SECRET_ACCESS_KEY'] = os.environ.get('SECRET_ACCESS_KEY_DEV')
-app.config['CERTIFICATE_VERIFY'] = False
-
-
 class LoginTest(TestCase):
     def setUp(self):
         self.client = app.test_client()
@@ -37,6 +30,7 @@ class LoginTest(TestCase):
     def test_good_login(self):
         # login and get token
         print('login')
+        print(app.config['LDAP_HOST'])
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         self.assertEqual(response.status_code, 201)
         self.assertIn('access_token', response.get_json())
@@ -73,7 +67,7 @@ class LoginTest(TestCase):
         response = self.client.post('/api/token', json=dict(password='jaewjfpewqjfjpewp'))
         self.assertEqual(response.status_code, 400)
 
-
+@mock_s3
 class RetrieveUrlTest(TestCase):
     def setUp(self) -> None:
 

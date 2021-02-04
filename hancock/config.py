@@ -3,7 +3,6 @@ from datetime import timedelta
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-print(basedir)
 load_dotenv(os.path.join(os.path.sep, basedir, '..', '.env'))
 
 ACCESS_EXPIRES = timedelta(minutes=15)

@@ -2,7 +2,7 @@ import requests
 import json
 import logging
 from hancock import app
-
+import logging
 
 SCICAT_URL = app.config['SCICAT_URL']
 
