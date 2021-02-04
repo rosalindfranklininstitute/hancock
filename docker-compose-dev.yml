@@ -28,7 +28,7 @@ services:
             HANCOCK_REDIS_HOSTNAME: redis
         env_file:
             # create this file yourself!
-            - .env
+            - .env-prod
         ports:
             - "5000:5000"
         labels:

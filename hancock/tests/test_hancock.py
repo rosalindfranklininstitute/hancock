@@ -30,7 +30,6 @@ class LoginTest(TestCase):
     def test_good_login(self):
         # login and get token
         print('login')
-        print(app.config['LDAP_HOST'])
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         self.assertEqual(response.status_code, 201)
         self.assertIn('access_token', response.get_json())
