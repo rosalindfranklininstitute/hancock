@@ -42,16 +42,16 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with nose 
       env:
-         TEST_USERNAME: zoidberg
-         TEST_PASSWORD: zoidberg
+         TEST_USERNAME: fry
+         TEST_PASSWORD: fry
          S3_ENDPOINT_URL: s3.myfakeendpoint.com
-         LDAP_HOST: localhost
+         LDAP_HOST: openldap
          LDAP_PORT: 10636
-         LDAP_USE_SSL: True
+         LDAP_USE_SSL: FALSE
          LDAP_BASE_DN: 'dc=planetexpress,dc=com'
          LDAP_USER_DN: 'ou=people'
          LDAP_USER_LOGIN_ATTR: 'uid'
-        LDAP_USER_RDN_ATTR: 'cn'
+         LDAP_USER_RDN_ATTR: 'cn'
          LDAP_USER_OBJECT_FILTER: (objectclass=inetOrgPerson)  
          LDAP_BIND_USER_DN: 'cn=admin,dc=planetexpress,dc=com'
          LDAP_BIND_USER_PASSWORD: GoodNewsEveryone
