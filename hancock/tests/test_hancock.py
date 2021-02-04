@@ -67,7 +67,7 @@ class LoginTest(TestCase):
         response = self.client.post('/api/token', json=dict(password='jaewjfpewqjfjpewp'))
         self.assertEqual(response.status_code, 400)
 
-@mock_s3
+
 class RetrieveUrlTest(TestCase):
     def setUp(self) -> None:
 
@@ -81,6 +81,7 @@ class RetrieveUrlTest(TestCase):
         self.s3.delete_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
         self.s3.delete_bucket(Bucket='rfi-test-bucket-abc')
 
+    @mock_s3
     def test_successful_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']
@@ -91,7 +92,7 @@ class RetrieveUrlTest(TestCase):
         self.assertNotEqual(response.status_code, '200')
         self.assertTrue('http' in response.json['presigned_url'])
 
-
+    @mock_s3
     def test_bad_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']

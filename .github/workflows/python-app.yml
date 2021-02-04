@@ -47,7 +47,7 @@ jobs:
          S3_ENDPOINT_URL: s3.myfakeendpoint.com
          LDAP_HOST: localhost
          LDAP_PORT: 10389
-         LDAP_USE_SSL: False
+         LDAP_USE_SSL: True
          LDAP_BASE_DN: dc=planetexpress,dc=com
          LDAP_USER_LOGIN_ATTR: cn
          LDAP_USER_OBJECT_FILTER: (objectclass=inetOrgPerson)  
