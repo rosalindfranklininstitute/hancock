@@ -8,3 +8,4 @@ python-dotenv
 redis
 uwsgi
 requests
+moto
