@@ -27,10 +27,12 @@ class LoginTest(TestCase):
     def setUp(self):
         self.client = app.test_client()
 
+    def tearDown(self) -> None:
+        self.client.delete()
+
     def test_good_login(self):
         # login and get token
         print('login')
-        print(app.config['HANCOCK_REDIS_HOST'])
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         self.assertEqual(response.status_code, 201)
         self.assertIn('access_token', response.get_json())
@@ -67,21 +69,26 @@ class LoginTest(TestCase):
         response = self.client.post('/api/token', json=dict(password='jaewjfpewqjfjpewp'))
         self.assertEqual(response.status_code, 400)
 
-
+@mock_s3
 class RetrieveUrlTest(TestCase):
+
     def setUp(self) -> None:
-
+        self.session = boto3.session.Session()
+        self.conn=self.session.resource('s3', region_name='us-east-1')
+        # We need to create the bucket since this is all in Moto's 'virtual' AWS account
+        self.conn.create_bucket(Bucket='rfi-test-bucket-abc')
+        self.conn.Object('rfi-test-bucket-abc','myfileobj.txt').put()
+        creds = self.session.get_credentials()
+        app.config['ACCESS_KEY'] = creds.access_key
+        app.config['SECRET_ACCESS_KEY'] = creds.secret_key
         self.client = app.test_client()
-        self.s3 = boto3.client('s3', **S3Operations.client_options(use_ssl=True))
-        self.s3.create_bucket(Bucket='rfi-test-bucket-abc')
-        self.s3.put_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
-
 
     def tearDown(self) -> None:
-        self.s3.delete_object(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt')
-        self.s3.delete_bucket(Bucket='rfi-test-bucket-abc')
+        self.conn.Object('rfi-test-bucket-abc', 'myfileobj.txt').delete()
+        self.conn.Bucket('rfi-test-bucket-abc').delete()
+        self.client.delete()
 
-    @mock_s3
+
     def test_successful_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']
@@ -92,7 +99,7 @@ class RetrieveUrlTest(TestCase):
         self.assertNotEqual(response.status_code, '200')
         self.assertTrue('http' in response.json['presigned_url'])
 
-    @mock_s3
+
     def test_bad_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']
