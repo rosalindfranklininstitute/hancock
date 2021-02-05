@@ -58,6 +58,6 @@ jobs:
          LDAP_USER_SEARCH_SCOPE: SUBTREE     
          ACCESS_KEY: N0T4R34L4CC3SSK3Y
          SECRET_ACCESS_KEY: N0T4R34LS3CR3TACC3SSK3Y
-         HANCOCK_REDIS_HOST: redis
+         HANCOCK_REDIS_HOST: localhost
       run: |
         nose2 -v --log-level DEBUG
