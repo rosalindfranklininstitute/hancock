@@ -99,7 +99,6 @@ class RetrieveUrlTest(TestCase):
         self.assertNotEqual(response.status_code, '200')
         self.assertTrue('http' in response.json['presigned_url'])
 
-
     def test_bad_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
         token = response.get_json()['access_token']
