@@ -8,3 +8,5 @@ python-dotenv
 redis
 uwsgi
 requests
+mock==4.0.2
+moto==1.3.16

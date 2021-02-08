@@ -4,13 +4,11 @@ from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
 from hancock import api, ldap_manager, jwt
 from hancock.config import  ACCESS_EXPIRES, Config
-#from .redis_utils import revoked_store
+from .redis_utils import revoked_store
 from .s3_utils import S3Operations
-import redis
-import requests
 
-revoked_store = redis.StrictRedis(host='redis', port=6379, db=0,
-                                  decode_responses=True)
+
+
 @api.route('/ping')
 class Ping(Resource):
     def get(self):
