@@ -1,27 +1,27 @@
-from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
+from hancock.hancock_api.models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, ldap_manager, jwt
-from hancock.config import  ACCESS_EXPIRES, Config
-from .redis_utils import revoked_store
-from .s3_utils import S3Operations
+from hancock import ldap_manager, jwt, revoked_store
+from . import hancock_api
+from hancock.config import ACCESS_EXPIRES
+from hancock.s3_utils import S3Operations
 
 
-
-@api.route('/ping')
+@hancock_api.route('/ping')
 class Ping(Resource):
     def get(self):
         return {'hi':'there'}
 
-@api.route('/token')
+@hancock_api.route('/token')
 class Token(Resource):
-    @api.expect(auth_creds_resource)
-    @api.marshal_with(token_resource, code=201, description='The new access token')
-    @api.doc(description='Create a new access token by providing a username and password that will be used for authenticating against an LDAP database')
+    @hancock_api.expect(auth_creds_resource)
+    @hancock_api.marshal_with(token_resource, code=201, description='The new access token')
+    @hancock_api.doc(description='Create a new access token by providing a username and password that will be used for'
+                        ' authenticating against an LDAP database')
     def post(self):
-        username = api.payload['username']
-        password = api.payload['password']
+        username = hancock_api.payload['username']
+        password = hancock_api.payload['password']
 
         response = ldap_manager.authenticate(username, password)
 
@@ -45,21 +45,21 @@ class Token(Resource):
         return ret, 201
 
 
-    @api.expect(token_resource)
-    @api.response(204, 'Token deleted')
-    @api.doc(description='Delete an access token')
+    @hancock_api.expect(token_resource)
+    @hancock_api.response(204, 'Token deleted')
+    @hancock_api.doc(description='Delete an access token')
     def delete(self):
-        access_jti = get_jti(encoded_token=api.payload['access_token'])
+        access_jti = get_jti(encoded_token=hancock_api.payload['access_token'])
         revoked_store.set(access_jti, 'true', ACCESS_EXPIRES * 1.2)
         return '', 204
 
-@api.route('/fetch_url')
+@hancock_api.route('/fetch_url')
 class FetchUrl(Resource):
-    @api.expect(object_info_resource)
-    @api.marshal_with(url_resource)
+    @hancock_api.expect(object_info_resource)
+    @hancock_api.marshal_with(url_resource)
     @jwt_required
     def post(self):
-      response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
+      response = S3Operations.generate_presigned_url(Bucket=hancock_api.payload['Bucket'], Key=hancock_api.payload['Key'])
 
       return response
 
@@ -72,11 +72,10 @@ def check_if_token_is_revoked(decrypted_token):
     return entry == 'true'
 
 
-@api.route('/receive_async_messages')
+@hancock_api.route('/receive_async_messages')
 class ReceiveAsyncMessages(Resource):
-    @api.expect(message_resource)
+    @hancock_api.expect(message_resource)
     def post(self):
-        if api.message:
+        if hancock_api.message:
             return 200
-
 

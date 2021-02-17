@@ -19,7 +19,7 @@ class Config(object):
     JWT_BLACKLIST_TOKEN_CHECKS = ['access']
 
     #Redis
-    HANCOCK_REDIS_HOST = os.environ.get('HANCOCK_REDIS_HOST')
+    REDIS_URL = os.environ.get('HANCOCK_REDIS_HOST')
 
     # LDAP
     # using docker container rroemhild/test-openldap to provide ldap service

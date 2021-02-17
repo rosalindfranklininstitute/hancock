@@ -1,10 +1,10 @@
 import requests
 import json
-import logging
-from hancock import app
+from flask import current_app
 import logging
 
-SCICAT_URL = app.config['SCICAT_URL']
+
+SCICAT_URL = current_app.config['SCICAT_URL']
 
 def get_associated_payload(pid):
     try:
