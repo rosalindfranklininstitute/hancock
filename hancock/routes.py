@@ -63,7 +63,7 @@ class FetchUrl(Resource):
 
       return response
 
-@jwt.token_in_blacklist_loader
+@jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(decrypted_token):
     jti = decrypted_token['jti']
     entry = revoked_store.get(jti)
