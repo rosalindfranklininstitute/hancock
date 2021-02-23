@@ -3,7 +3,6 @@ from hancock import app, api
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
-from hancock.s3_utils import S3Operations
 import os
 from moto import mock_s3
 
@@ -14,21 +13,18 @@ TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
 # Add REST API endpoint for testing basic functionality
 @api.route('/protected')
 class Protected(Resource):
-    @jwt_required
+    @jwt_required()
     def get(self):
-        return {'hello': 'world'}
+        return dict(hello='world')
 
 
 def make_headers(jwt):
-    return {'Authorization': 'Bearer {}'.format(jwt)}
+    return dict(Authorization='Bearer {}'.format(jwt))
 
 
 class LoginTest(TestCase):
     def setUp(self):
         self.client = app.test_client()
-
-    def tearDown(self) -> None:
-        self.client.delete()
 
     def test_good_login(self):
         # login and get token

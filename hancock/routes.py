@@ -57,14 +57,14 @@ class Token(Resource):
 class FetchUrl(Resource):
     @api.expect(object_info_resource)
     @api.marshal_with(url_resource)
-    @jwt_required
+    @jwt_required()
     def post(self):
       response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
 
       return response
 
-@jwt.token_in_blacklist_loader
-def check_if_token_is_revoked(decrypted_token):
+@jwt.token_in_blocklist_loader
+def check_if_token_is_revoked(jwt_header, decrypted_token):
     jti = decrypted_token['jti']
     entry = revoked_store.get(jti)
     if entry is None:
