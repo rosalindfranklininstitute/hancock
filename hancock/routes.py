@@ -57,7 +57,7 @@ class Token(Resource):
 class FetchUrl(Resource):
     @api.expect(object_info_resource)
     @api.marshal_with(url_resource)
-    @jwt_required
+    @jwt_required()
     def post(self):
       response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
 
