@@ -26,9 +26,6 @@ class LoginTest(TestCase):
     def setUp(self):
         self.client = app.test_client()
 
-    def tearDown(self) -> None:
-        self.client.delete()
-
     def test_good_login(self):
         # login and get token
         print('login')
