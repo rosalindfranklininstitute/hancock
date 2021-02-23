@@ -13,7 +13,7 @@ TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
 # Add REST API endpoint for testing basic functionality
 @api.route('/protected')
 class Protected(Resource):
-    @jwt_required
+    @jwt_required()
     def get(self):
         return dict(hello='world')
 
