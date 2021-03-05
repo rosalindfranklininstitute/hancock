@@ -41,3 +41,5 @@ class Config(object):
     SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
     CERTIFICATE_VERIFY= True
 
+    #SCICAT
+    SCICAT_URL = os.environ.get('SCICAT_URL')
