@@ -2,7 +2,7 @@ import requests
 import json
 import logging
 from hancock import app
-import logging
+
 
 SCICAT_URL = app.config['SCICAT_URL']
 
@@ -11,8 +11,5 @@ def get_associated_payload(pid):
     scicat_token = r.json()['id']
     query = json.dumps({"where": {"pid": pid}})
 
-
     payload = requests.get(SCICAT_URL + "Datasets", params={"filter": query, "access_token": scicat_token})
-    payload.raise_for_status()
-
     return payload.json()

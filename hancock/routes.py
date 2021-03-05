@@ -84,8 +84,7 @@ class ReceiveAsyncMessages(Resource):
             return None
         S3Operations.client_options()
         url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
-        print(url)
-        return None
+        return url
 
 
 @jwt.token_in_blocklist_loader
