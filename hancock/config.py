@@ -34,7 +34,7 @@ class Config(object):
     LDAP_USER_SEARCH_SCOPE = os.environ.get('LDAP_USER_SEARCH_SCOPE')
     LDAP_USER_DN = os.environ.get('LDAP_USER_DN')
     LDAP_USER_RDN_ATTR= os.environ.get('LDAP_USER_RDN_ATTR')
-
+    LDAP_GROUP_OBJECT_FILTER= os.environ.get('LDAP_GROUP_OBJECT_FILTER')
     #S3
     S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')
     ACCESS_KEY = os.environ.get('ACCESS_KEY')

@@ -63,6 +63,15 @@ class FetchUrl(Resource):
 
       return response
 
+@api.route('/receive_async_messages')
+class ReceiveAsyncMessages(Resource):
+    @jwt_required()
+    @api.expect(message_resource)
+    def post(self):
+        print(f"message received:{api.payload['async_message']}")
+        return None
+
+
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):
     jti = decrypted_token['jti']
@@ -72,11 +81,6 @@ def check_if_token_is_revoked(jwt_header, decrypted_token):
     return entry == 'true'
 
 
-@api.route('/receive_async_messages')
-class ReceiveAsyncMessages(Resource):
-    @api.expect(message_resource)
-    def post(self):
-        if api.message:
-            return 200
+
 
 

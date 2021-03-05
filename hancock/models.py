@@ -12,11 +12,14 @@ token_resource = api.model('Token', {
 })
 
 object_info_resource = api.model('ObjectCredentials', {
-    'Bucket': fields.String(description= 'path to source folder on S3 object', required=True),
-    'Key': fields.String(description= 'path to object', required=True)
+    'Bucket': fields.String(description='path to source folder on S3 object', required=True),
+    'Key': fields.String(description='path to object', required=True)
 })
 
-url_resource = api.model('PresignedUrl', {'presigned_url': fields.String(description= "presigned url to download the data",
-                                           required= True)})
+url_resource = api.model('PresignedUrl', {
+                            'presigned_url': fields.String(description="presigned url to download the data",
+                                                           required=True)})
 
-message_resource = api.model('AsynchronusMessage', {'async_message': fields.String(description ="message from rabbitMQ")})
+message_resource = api.model('AsynchronousMessage', {
+                                'async_message': fields.String(description="message from rabbitMQ",
+                                                               required=True)})

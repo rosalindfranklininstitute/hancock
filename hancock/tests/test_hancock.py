@@ -5,11 +5,12 @@ from flask_restx import Resource
 import boto3
 import os
 from moto import mock_s3
-
+import json
 
 TEST_USERNAME = os.environ.get('TEST_USERNAME')
 TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
-
+TEST_USERNAME2 = os.environ.get('TEST_USERNAME2')
+TEST_PASSWORD2 = os.environ.get('TEST_PASSWORD2')
 # Add REST API endpoint for testing basic functionality
 @api.route('/protected')
 class Protected(Resource):
@@ -86,20 +87,33 @@ class RetrieveUrlTest(TestCase):
 
 
     def test_successful_retrieval(self):
-        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
         token = response.get_json()['access_token']
         response = self.client.post('/api/fetch_url',
                                     json=dict(Bucket='rfi-test-bucket-abc', Key='myfileobj.txt'),
                                     headers=make_headers(token))
 
         self.assertNotEqual(response.status_code, '200')
+        print(response.json)
         self.assertTrue('http' in response.json['presigned_url'])
 
     def test_bad_retrieval(self):
-        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME, password=TEST_PASSWORD))
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
         token = response.get_json()['access_token']
         response = self.client.post('/api/fetch_url',
                                     json=dict(Bucket='rfi-test-bucket-485', Key='notmyfileobj.txt'),
                                     headers=make_headers(token))
         self.assertEqual(response.status_code, 404)
 
+
+class TestReceiveMessages(TestCase):
+    def setUp(self) -> None:
+        self.client = app.test_client()
+
+    def test_receive_async_messages(self):
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
+        token = response.get_json()['access_token']
+        response = self.client.post('/api/receive_async_messages',
+                                    json=dict(async_message="hello world"),
+                                    headers=make_headers(token))
+        self.assertEqual(response.status_code, 200)
