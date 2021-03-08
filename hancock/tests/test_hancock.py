@@ -104,16 +104,3 @@ class RetrieveUrlTest(TestCase):
                                     json=dict(Bucket='rfi-test-bucket-485', Key='notmyfileobj.txt'),
                                     headers=make_headers(token))
         self.assertEqual(response.status_code, 404)
-
-
-class TestReceiveMessages(TestCase):
-    def setUp(self) -> None:
-        self.client = app.test_client()
-
-    def test_receive_async_messages(self):
-        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
-        token = response.get_json()['access_token']
-        response = self.client.post('/api/receive_async_messages',
-                                    json=dict(async_message="{'datasetList':[{'pid':'PutYourPIDPrefixHere/995bed8f-1b3c-42c8-a999-39743440d025'}]}"),
-                                    headers=make_headers(token))
-        self.assertEqual(response.status_code, 200)
