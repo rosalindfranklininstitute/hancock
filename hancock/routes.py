@@ -1,4 +1,4 @@
-from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
+from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource, url_list_resource
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
@@ -69,23 +69,28 @@ class FetchUrl(Resource):
 class ReceiveAsyncMessages(Resource):
     @jwt_required()
     @api.expect(message_resource)
+    @api.marshal_with(url_resource, as_list=True)
     def post(self):
         print(f"message received:{api.payload['async_message']}")
         payload = ast.literal_eval(api.payload['async_message'])
-        pid =payload["datasetList"][0]['pid']
-        output = get_associated_payload(pid)
-        print(pid)
-        if output:
-            bucket = urlparse(output[0]['sourceFolderHost'])[1].split('.')[0]
-            key = output[0]['sourceFolder'].strip('/')
-            print(bucket, key)
+        datasetList = payload["datasetList"]
+        output_ls = []
+        for item in datasetList:
+             output = get_associated_payload(item['pid'])
+             output_ls.append(output)
+        url_ls=[]
+        if output_ls:
+            for output in output_ls:
+                bucket = urlparse(output[0]['sourceFolderHost'])[1].split('.')[0]
+                key = output[0]['sourceFolder'].strip('/')
+                S3Operations.client_options()
+                url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
+                url_ls.append(url[0])
         else:
             print('cannot retrieve information')
             return None
-        S3Operations.client_options()
-        url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
-        return url
 
+        return url_ls, 200
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):
