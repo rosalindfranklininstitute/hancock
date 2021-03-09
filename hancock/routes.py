@@ -1,4 +1,4 @@
-from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource, url_list_resource
+from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
