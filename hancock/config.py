@@ -38,3 +38,4 @@ class Config(object):
     SMTP_PORT = os.environ.get('SMTP_PORT')
     SMTP_LOGIN_USER = os.environ.get('SMTP_LOGIN_USER')
     SMTP_LOGIN_PASSWORD = os.environ.get('SMTP_LOGIN_PASSWORD')
+    SMTP_SENDER_EMAIL = os.environ.get('SMTP_SENDER_EMAIL')

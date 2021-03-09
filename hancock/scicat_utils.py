@@ -14,3 +14,18 @@ def get_associated_payload(pid):
     payload = requests.get(SCICAT_URL + "Datasets", params={"filter": query, "access_token": scicat_token})
     return payload.json()
 
+def create_scicat_message(url_list):
+
+    url_str = "\n"
+    for url in url_list:
+        url_str = url_str + url['presigned_url'] + '\n'
+
+    message =  """\
+    Subject: Batch Data Job 
+    """ + url_str
+    """
+    
+    This message is sent from hancock.
+    
+    """
+    return message

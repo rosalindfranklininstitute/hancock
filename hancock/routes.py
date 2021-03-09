@@ -6,9 +6,10 @@ from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
 import ast
-from .scicat_utils import get_associated_payload
+from .scicat_utils import get_associated_payload, create_scicat_message
 from urllib.parse import urlparse
 from .auth_utils import AuthentificationFail
+from .smtp_utils import SMTPConnect
 
 
 @api.route('/ping')
@@ -70,7 +71,6 @@ class FetchUrl(Resource):
 class ReceiveAsyncMessages(Resource):
     @jwt_required()
     @api.expect(message_resource)
-    @api.marshal_with(url_resource, as_list=True)
     def post(self):
         print(f"message received:{api.payload['async_message']}")
         payload = ast.literal_eval(api.payload['async_message'])
@@ -90,8 +90,11 @@ class ReceiveAsyncMessages(Resource):
         else:
             print('cannot retrieve information')
             return None
+        url_message = create_scicat_message(url_ls)
+        print(url_message)
+        SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
 
-        return url_ls, 200
+        return "job complete", 200
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):
