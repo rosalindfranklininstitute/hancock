@@ -13,3 +13,4 @@ def get_associated_payload(pid):
 
     payload = requests.get(SCICAT_URL + "Datasets", params={"filter": query, "access_token": scicat_token})
     return payload.json()
+

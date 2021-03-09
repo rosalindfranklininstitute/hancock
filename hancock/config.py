@@ -32,3 +32,9 @@ class Config(object):
 
     #SCICAT
     SCICAT_URL = os.environ.get('SCICAT_URL')
+
+    # SMTP
+    SMTP_SERVER = os.environ.get('SMTP_SERVER')
+    SMTP_PORT = os.environ.get('SMTP_PORT')
+    SMTP_LOGIN_USER = os.environ.get('SMTP_LOGIN_USER')
+    SMTP_LOGIN_PASSWORD = os.environ.get('SMTP_LOGIN_PASSWORD')
