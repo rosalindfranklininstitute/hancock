@@ -1,6 +1,18 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import json
+
+def setup_session_users():
+    with open(os.environ.get('USER_SETUP_JSON')) as user_file:
+        users = json.load(user_file)
+    if users:
+        Users = {}
+        for k, v in users.items():
+            Users[k] = User(k, v)
+        return Users
+    else:
+        print('user config not loaded')
 
 class User(UserMixin):
     def __init__(self, username, password):
@@ -15,9 +27,7 @@ class User(UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-Users = {'xchanger': User('xchanger', os.environ.get('XCHANGER_PASSWORD')),
-         'catanie': User('catanie', os.environ.get('CATANIE_PASSWORD'))}
-
+Users = setup_session_users()
 
 def authenticate_user(username, password):
     try:
@@ -30,7 +40,10 @@ def authenticate_user(username, password):
         raise AuthentificationFail('invalid username or password')
 
 
-
 class AuthentificationFail(Exception):
     """Info required in Scicat Payload not found"""
     pass
+
+
+
+

@@ -3,8 +3,8 @@ from hancock.config import Config
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 
 app.config.from_object(Config)
 
