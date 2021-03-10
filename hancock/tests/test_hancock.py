@@ -7,11 +7,12 @@ import os
 from moto import mock_s3
 import json
 
-TEST_USERNAME = os.environ.get('TEST_USERNAME')
-TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
-TEST_USERNAME2 = os.environ.get('TEST_USERNAME2')
-TEST_PASSWORD2 = os.environ.get('TEST_PASSWORD2')
+TEST_USERNAME = 'xchanger'
+TEST_PASSWORD = os.environ.get('XCHANGER_PASSWORD')
+TEST_USERNAME2 = 'catanie'
+TEST_PASSWORD2 = os.environ.get('CATANIE_PASSWORD')
 # Add REST API endpoint for testing basic functionality
+
 @api.route('/protected')
 class Protected(Resource):
     @jwt_required()

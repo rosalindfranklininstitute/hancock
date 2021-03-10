@@ -2,13 +2,14 @@ from .models import auth_creds_resource, token_resource, object_info_resource, u
 from flask_restx import Resource, abort
 from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, ldap_manager, jwt
+from hancock import api, jwt
 from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
 import ast
 from .scicat_utils import get_associated_payload
 from urllib.parse import urlparse
+from .auth_utils import authenticate_user, AuthentificationFail
 
 @api.route('/ping')
 class Ping(Resource):
@@ -24,9 +25,9 @@ class Token(Resource):
         username = api.payload['username']
         password = api.payload['password']
 
-        response = ldap_manager.authenticate(username, password)
-
-        if response.status == AuthenticationResponseStatus.fail:
+        try:
+              authenticate_user(username, password)
+        except AuthentificationFail as e:
             abort(401, "Bad username or password")
 
         # Create our JWTs
