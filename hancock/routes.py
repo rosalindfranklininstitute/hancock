@@ -1,15 +1,15 @@
 from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
 from flask_restx import Resource, abort
-from flask_ldap3_login import AuthenticationResponseStatus
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, jwt
+from hancock import api, jwt, auth_manager
 from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
 import ast
 from .scicat_utils import get_associated_payload
 from urllib.parse import urlparse
-from .auth_utils import authenticate_user, AuthentificationFail
+from .auth_utils import AuthentificationFail
+
 
 @api.route('/ping')
 class Ping(Resource):
@@ -26,7 +26,7 @@ class Token(Resource):
         password = api.payload['password']
 
         try:
-              authenticate_user(username, password)
+              auth_manager.authenticate_user(username, password)
         except AuthentificationFail as e:
             abort(401, "Bad username or password")
 
@@ -100,6 +100,8 @@ def check_if_token_is_revoked(jwt_header, decrypted_token):
     if entry is None:
         return True
     return entry == 'true'
+
+
 
 
 

@@ -1,7 +1,7 @@
 # Hancock - Microservice for Pre-Signed URLs
 ## Structure
 Hancock is a Flask Rest-API that generates pre-signed URLs from an S3 bucket for a given key and bucket. It is designed 
-safely retrieve data from S3 without need for access keys to be generated for the users.
+safely retrieve data from S3 without need for access keys to be generated for the users. 
 
 Users will not have access to Hancock, it will be purely triggered from other systems, such as a data cataloguing system.This system would  trigger a message on RabbitMQ. The information in this message is then used by Hancock to retrieve the Pre-signed URL.
 
@@ -17,25 +17,17 @@ docker-compose -f docker-compose-dev.yaml up --build
 ```
 You will need to set up a .env file with the following fields:
 ```
-HANCOCK_REDIS_HOST
-LDAP_HOST
-LDAP_PORT
-LDAP_USE_SSL
-LDAP_BASE_DN
-LDAP_USER_LOGIN_ATTR
-LDAP_USER_OBJECT_FILTER
-LDAP_BIND_USER_DN
-LDAP_BIND_USER_PASSWORD
-LDAP_USER_SEARCH_SCOPE
+USER_SETUP_JSON
 S3_ENDPOINT_URL
 ACCESS_KEY
 SECRET_ACCESS_KEY
+TEST_S3_ENDPOINT_URL
+HANCOCK_REDIS_HOST
+SCICAT_URL
 ```
-For testing you can add the following fields to the .env
+The User set up json will contain the user name and password of the service, or few services that you want to work with hancock.
+Structure should look like:
 ```
-TEST_USERNAME
-TEST_PASSWORD
-S3_ENDPOINT_URL_DEV
-ACCESS_KEY_DEV
-SECRET_ACCESS_KEY_DEV
+{"myservice1":"servicepassword",
+"myservice2":"servicespassword2"}
 ```

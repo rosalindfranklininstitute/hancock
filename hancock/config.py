@@ -12,9 +12,6 @@ class Config(object):
     # Flask
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
 
-    # SQLLITE FOR USE AUTH
-    SQLALCHEMY_DATABASE_URI ='sqlite:///../hancock_users.db'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     #JWT
     JWT_ACCESS_TOKEN_EXPIRES = ACCESS_EXPIRES
@@ -25,7 +22,8 @@ class Config(object):
     #Redis
     HANCOCK_REDIS_HOST = os.environ.get('HANCOCK_REDIS_HOST')
 
-
+    # Microservice auth
+    USER_SETUP_JSON = os.environ.get('USER_SETUP_JSON')
     #S3
     S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')
     ACCESS_KEY = os.environ.get('ACCESS_KEY')

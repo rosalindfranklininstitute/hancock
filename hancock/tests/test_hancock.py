@@ -7,10 +7,10 @@ import os
 from moto import mock_s3
 import json
 
-TEST_USERNAME = 'xchanger'
-TEST_PASSWORD = os.environ.get('XCHANGER_PASSWORD')
-TEST_USERNAME2 = 'catanie'
-TEST_PASSWORD2 = os.environ.get('CATANIE_PASSWORD')
+TEST_USERNAME = "myservice1"
+TEST_PASSWORD = "weofnewofinoew"
+TEST_USERNAME2= "myservice2"
+TEST_PASSWORD2 = "sghiueswgeiwgh"
 # Add REST API endpoint for testing basic functionality
 
 @api.route('/protected')
@@ -26,6 +26,7 @@ def make_headers(jwt):
 
 class LoginTest(TestCase):
     def setUp(self):
+        app.config['USER_SETUP_JSON'] = 'test_users.json'
         self.client = app.test_client()
 
     def test_good_login(self):
@@ -79,6 +80,7 @@ class RetrieveUrlTest(TestCase):
         creds = self.session.get_credentials()
         app.config['ACCESS_KEY'] = creds.access_key
         app.config['SECRET_ACCESS_KEY'] = creds.secret_key
+        app.config['USER_SETUP_JSON'] = 'test_users.json'
         self.client = app.test_client()
 
     def tearDown(self) -> None:
