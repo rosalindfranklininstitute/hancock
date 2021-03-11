@@ -29,6 +29,8 @@ services:
         env_file:
             # create this file yourself!
             - .env
+        volumes:
+            - ./config/users.json:/app/users.json
         ports:
             - "5000:5000"
         labels:
