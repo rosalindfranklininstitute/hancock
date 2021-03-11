@@ -43,7 +43,7 @@ jobs:
     - name: Test with nose 
       env:
          USER_SETUP_JSON: tests/users.json
-         S3_ENDPOINT_URL: 'http://s3.amazonaws.com'
+         S3_ENDPOINT_URL: 'https://s3.amazonaws.com'
          ACCESS_KEY: N0T4R34L4CC3SSK3Y
          SECRET_ACCESS_KEY: N0T4R34LS3CR3TACC3SSK3Y
          HANCOCK_REDIS_HOST: localhost

@@ -78,7 +78,6 @@ class RetrieveUrlTest(TestCase):
         creds = self.session.get_credentials()
         app.config['ACCESS_KEY'] = creds.access_key
         app.config['SECRET_ACCESS_KEY'] = creds.secret_key
-        app.config['USER_SETUP_JSON'] = 'test_users.json'
         self.client = app.test_client()
 
     def tearDown(self) -> None:
