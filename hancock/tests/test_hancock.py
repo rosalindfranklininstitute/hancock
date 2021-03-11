@@ -3,7 +3,6 @@ from hancock import app, api
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
-import os
 from moto import mock_s3
 import json
 
@@ -26,7 +25,6 @@ def make_headers(jwt):
 
 class LoginTest(TestCase):
     def setUp(self):
-        app.config['USER_SETUP_JSON'] = 'test_users.json'
         self.client = app.test_client()
 
     def test_good_login(self):
