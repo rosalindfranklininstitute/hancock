@@ -42,23 +42,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with nose 
       env:
-         TEST_USERNAME: fry
-         TEST_PASSWORD: fry
-         TEST_USERNAME2: zoidberg
-         TEST_PASSWORD2: zoidberg
-         S3_ENDPOINT_URL: 'http://s3.amazonaws.com'
-         LDAP_HOST: ldap://localhost
-         LDAP_PORT: 10389
-         LDAP_USE_SSL: FALSE
-         LDAP_BASE_DN: dc=planetexpress,dc=com
-         LDAP_USER_DN: ou=people
-         LDAP_USER_LOGIN_ATTR: uid
-         LDAP_USER_RDN_ATTR: cn
-         LDAP_USER_OBJECT_FILTER: (objectclass=inetOrgPerson)
-         LDAP_GROUP_OBJECT_FILTER: (objectclass=Group)
-         LDAP_BIND_USER_DN: cn=admin,dc=planetexpress,dc=com
-         LDAP_BIND_USER_PASSWORD: GoodNewsEveryone
-         LDAP_USER_SEARCH_SCOPE: SUBTREE     
+         USER_SETUP_JSON: hancock/tests/users.json
+         S3_ENDPOINT_URL: 'https://s3.amazonaws.com'
          ACCESS_KEY: N0T4R34L4CC3SSK3Y
          SECRET_ACCESS_KEY: N0T4R34LS3CR3TACC3SSK3Y
          HANCOCK_REDIS_HOST: localhost

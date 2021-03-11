@@ -3,15 +3,15 @@ from hancock import app, api
 from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
-import os
 from moto import mock_s3
 import json
 
-TEST_USERNAME = os.environ.get('TEST_USERNAME')
-TEST_PASSWORD = os.environ.get('TEST_PASSWORD')
-TEST_USERNAME2 = os.environ.get('TEST_USERNAME2')
-TEST_PASSWORD2 = os.environ.get('TEST_PASSWORD2')
+TEST_USERNAME = "myservice1"
+TEST_PASSWORD = "weofnewofinoew"
+TEST_USERNAME2= "myservice2"
+TEST_PASSWORD2 = "sghiueswgeiwgh"
 # Add REST API endpoint for testing basic functionality
+
 @api.route('/protected')
 class Protected(Resource):
     @jwt_required()

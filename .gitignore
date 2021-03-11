@@ -5,3 +5,5 @@ __pycache__
 .idea
 logs
 log/*.log
+*.db
+config/users.json
