@@ -6,4 +6,3 @@ __pycache__
 logs
 log/*.log
 *.db
-users.json
