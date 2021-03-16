@@ -64,10 +64,10 @@ class FetchUrl(Resource):
     def post(self):
       S3Operations.client_options()
       response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
-
       return response
 
 @api.route('/receive_async_messages')
+@api.response(200, 'Job Complete')
 class ReceiveAsyncMessages(Resource):
     @jwt_required()
     @api.expect(message_resource)
@@ -94,7 +94,7 @@ class ReceiveAsyncMessages(Resource):
         print(url_message)
         SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
 
-        return "job complete", 200
+        return '', 200
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):
