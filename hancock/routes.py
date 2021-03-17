@@ -6,8 +6,7 @@ from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
 import ast
-from .scicat_utils import get_associated_payload, create_scicat_message
-from urllib.parse import urlparse
+from .scicat_utils import get_associated_payload, create_scicat_message, check_process_bucket_key
 from .auth_utils import AuthentificationFail
 from .smtp_utils import SMTPConnect
 
@@ -76,29 +75,40 @@ class ReceiveAsyncMessages(Resource):
         print(f"message received:{api.payload['async_message']}")
         try:
             payload = ast.literal_eval(api.payload['async_message'])
+            dataset_list = payload["datasetList"]
         except (SyntaxError, ValueError) as e:
             print(e)
-            abort(401, "Cannot read async messages")
+            abort(401, "Invalid Message")
 
-        datasetList = payload["datasetList"]
-        output_ls = []
-        for item in datasetList:
-             output = get_associated_payload(item['pid'])
-             output_ls.append(output)
-        url_ls=[]
-        if output_ls:
-            for output in output_ls:
-                bucket = urlparse(output[0]['sourceFolderHost'])[1].split('.')[0]
-                key = output[0]['sourceFolder'].strip('/')
-                S3Operations.client_options()
-                url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
-                url_ls.append(url[0])
+        if dataset_list:
+            output_ls = [get_associated_payload(item['pid']) for item in dataset_list]
+
+            url_ls = []
+            if output_ls:
+                for output in output_ls:
+                    try:
+                        bucket, key = check_process_bucket_key(output[0])
+                        S3Operations.client_options()
+                        url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
+                        url_ls.append(url[0])
+                    except Exception as e:
+                        print(e)
+                        continue
+                    finally:
+                        if not url_ls:
+                            abort(406, "Failed to retrieve pre-signed url")
+            else:
+                abort(406, "Failed to retrieve dataset information")
         else:
-            print('cannot retrieve information')
-            return None
-        url_message = create_scicat_message(url_ls)
-        print(url_message)
-        SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
+            abort(406, "Cannot retrieve dataset list")
+
+        try:
+            url_message = create_scicat_message(url_ls)
+            print('EMAIL created')
+            SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
+        except Exception as e:
+             print(e)
+             abort(406, "Unable to successfully send email")
 
         return 'Job Complete', 200
 

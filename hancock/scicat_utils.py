@@ -1,7 +1,7 @@
 import requests
 import json
 from hancock import app
-
+from urllib.parse import urlparse
 
 SCICAT_URL = app.config['SCICAT_URL']
 
@@ -13,18 +13,21 @@ def get_associated_payload(pid):
     payload = requests.get(SCICAT_URL + "Datasets", params={"filter": query, "access_token": scicat_token})
     return payload.json()
 
-def check_and_process_payload(payload):
+def check_process_bucket_key(payload):
     """
-    checks payload coming from scicat
+    checks the source folder host coming in from scicat
 
     params:
-         payload: the payload returned from scicat
+         payload: the payload returned from scicat datasets query
     """
-    if "datasetList" not in payload.keys():
-        print("malformed payload cannot process")
-
+    if ('sourceFolderHost' and 'sourceFolder') in payload.keys():
+        bucket = urlparse(payload['sourceFolderHost'])[1].split('.')[0]
+        key = payload['sourceFolder'].strip('/')
+        return bucket, key
     else:
-        datasetList = payload['datasetList']
+        return None
+
+
 
 
 def create_scicat_message(url_list):

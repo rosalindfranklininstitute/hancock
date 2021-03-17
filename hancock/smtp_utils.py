@@ -3,7 +3,7 @@ from hancock import app
 
 class SMTPConnect:
     @classmethod
-    def connect_to_smpt(cls):
+    def connect_to_smtp(cls):
         context = ssl.create_default_context()
 
 
@@ -23,7 +23,7 @@ class SMTPConnect:
     @classmethod
     def send_email(cls,  to_address, message):
 
-            server = cls.connect_to_smpt()
+            server = cls.connect_to_smtp()
             print(app.config['SMTP_SENDER_EMAIL'])
             server.sendmail(from_addr=app.config['SMTP_SENDER_EMAIL'], to_addrs=to_address, msg=message)
 
