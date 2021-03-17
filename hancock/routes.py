@@ -67,10 +67,11 @@ class FetchUrl(Resource):
       return response
 
 @api.route('/receive_async_messages')
-@api.response(200, 'Job Complete')
+
 class ReceiveAsyncMessages(Resource):
     @jwt_required()
     @api.expect(message_resource)
+    @api.response(200, 'Job Complete')
     def post(self):
         print(f"message received:{api.payload['async_message']}")
         payload = ast.literal_eval(api.payload['async_message'])
