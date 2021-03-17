@@ -108,5 +108,5 @@ class RetrieveUrlTest(TestCase):
 class TestEmail(TestCase):
     def test_create_message(self):
         url_list = [{'presigned_url':'url_1'}, {'presigned_url':'url_2'}, {'presigned_url':'url_3'}]
-        message= create_scicat_message(url_list)
+        message=create_scicat_message(url_list)
         print(message)

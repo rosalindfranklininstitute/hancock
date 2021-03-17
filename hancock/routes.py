@@ -74,7 +74,12 @@ class ReceiveAsyncMessages(Resource):
     @api.response(200, 'Job Complete')
     def post(self):
         print(f"message received:{api.payload['async_message']}")
-        payload = ast.literal_eval(api.payload['async_message'])
+        try:
+            payload = ast.literal_eval(api.payload['async_message'])
+        except (SyntaxError, ValueError) as e:
+            print(e)
+            abort(401, "Cannot read async messages")
+
         datasetList = payload["datasetList"]
         output_ls = []
         for item in datasetList:
@@ -95,7 +100,7 @@ class ReceiveAsyncMessages(Resource):
         print(url_message)
         SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
 
-        return '', 200
+        return 'Job Complete', 200
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):
