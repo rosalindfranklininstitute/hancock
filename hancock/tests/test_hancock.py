@@ -68,6 +68,10 @@ class LoginTest(TestCase):
         response = self.client.post('/api/token', json=dict(password='jaewjfpewqjfjpewp'))
         self.assertEqual(response.status_code, 400)
 
+        response = self.client.post('/api/token', json=dict(username='myservice1', password='jeawjfpfjewf'))
+        self.assertEqual(response.status_code, 401)
+
+
 @mock_s3
 class RetrieveUrlTest(TestCase):
 
