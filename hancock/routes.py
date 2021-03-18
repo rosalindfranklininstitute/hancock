@@ -94,11 +94,16 @@ class ReceiveAsyncMessages(Resource):
                 url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
                 url_ls.append(url[0])
         else:
-            print('cannot retrieve information')
-            return None
-        url_message = create_scicat_message(url_ls)
-        print(url_message)
-        SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
+            abort(406, "Cannot retrieve dataset list")
+
+        try:
+            url_bytes_io = create_scicat_message(url_ls)
+            app.logger.info('EMAIL created')
+            SMTPConnect.send_email(payload["emailJobInitiator"], url_string_io=url_bytes_io)
+        except Exception as e:
+             app.logger.debug(e)
+             abort(406, "Unable to successfully send email")
+
 
         return 'Job Complete', 200
 

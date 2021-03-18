@@ -5,6 +5,8 @@ from flask_restx import Resource
 import boto3
 from moto import mock_s3
 from hancock.scicat_utils import create_scicat_message
+from hancock.smtp_utils import create_email
+
 
 TEST_USERNAME = "myservice1"
 TEST_PASSWORD = "weofnewofinoew"
@@ -105,9 +107,21 @@ class RetrieveUrlTest(TestCase):
                                     headers=make_headers(token))
         self.assertEqual(response.status_code, 404)
 
+
 class TestEmail(TestCase):
     def test_create_message(self):
         url_list = [{'presigned_url':'url_1'}, {'presigned_url':'url_2'}, {'presigned_url':'url_3'}]
         message = create_scicat_message(url_list)
         self.assertNotEqual(message, None)
-        self.assertIn('url_1', message)
+        self.assertIsInstance(message, bytes)
+
+
+class SMTPUtilsTest(TestCase):
+    def setUp(self) -> None:
+        pass
+
+    def test_create_email(self):
+        url_bytes_io = bytes('https://myfake_presigned_url.com_EGETTENASJFCD', 'ascii')
+        message = create_email('myemail@gmail.com', url_bytes_io)
+        self.assertIn("Content-Type: multipart/mixed", message)
+        self.assertIn('To: myemail@gmail.com', message)

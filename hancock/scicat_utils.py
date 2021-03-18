@@ -33,6 +33,4 @@ def create_scicat_message(url_list):
     for url in url_list:
         url_str = url_str + url['presigned_url'] + url_str
 
-    message = "Subject: Batch Data Job \n" + url_str + "This message is sent from hancock. "
-
-    return message
+    return bytes(url_str,'ascii')
