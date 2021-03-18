@@ -122,24 +122,45 @@ class MockResponse:
                 return self.json_data
 
 
+class MockResponse:
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
 SCICAT_URL = app.config['SCICAT_URL']
 
+
 def mocked_requests_post(*args, **kwargs):
-
-
     if args[0] == SCICAT_URL + 'Users/login':
         return MockResponse({"id": "faketoken"}, 200)
 
     return MockResponse(None, 404)
 
-def mocked_requests_get(*args, **kwargs):
 
+def mocked_requests_get(*args, **kwargs):
     if SCICAT_URL + 'Dataset' in args[0]:
         return MockResponse({"pid": "my-fake-pid/123'",
-                             "sourceFolderHost":"s3.myfakebucket.somecloud.org",
+                             "sourceFolderHost": "s3.myfakebucket.somecloud.org",
                              "sourceFolder": "myfile.txt"}, 200)
 
     return MockResponse(None, 404)
+
+
+class ScicatUtilsTest(TestCase):
+    def setUp(self):
+        self.pid = 'my-fake-pid/123'
+
+    @patch('hancock.scicat_utils.requests.post', side_effect=mocked_requests_post)
+    @patch('hancock.scicat_utils.requests.get', side_effect=mocked_requests_get)
+    def test_get_associated_payload(self, mock_post, mock_get):
+        r = get_associated_payload(self.pid)
+        self.assertIn('pid', r.keys())
+        self.assertIn('sourceFolderHost', r.keys())
+        self.assertIn('sourceFolder', r.keys())
 
 
 class ScicatUtilsTest(TestCase):
