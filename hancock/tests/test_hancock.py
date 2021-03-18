@@ -5,8 +5,8 @@ from flask_restx import Resource
 import boto3
 from moto import mock_s3
 from hancock.scicat_utils import create_scicat_message, get_associated_payload
-from unittest.mock import Mock, patch
-import requests
+from unittest.mock import patch
+
 
 TEST_USERNAME = "myservice1"
 TEST_PASSWORD = "weofnewofinoew"
@@ -109,9 +109,7 @@ class RetrieveUrlTest(TestCase):
 
 
 
-
-def mocked_requests_post(*args, **kwargs):
-        class MockResponse:
+class MockResponse:
             def __init__(self, json_data, status_code):
                 self.json_data = json_data
                 self.status_code = status_code
@@ -119,16 +117,25 @@ def mocked_requests_post(*args, **kwargs):
             def json(self):
                 return self.json_data
 
-        SCICAT_URL = app.config['SCICAT_URL']
-        if args[0] == SCICAT_URL + 'Users/login':
-            return MockResponse({"id": "faketoken"}, 200)
-        elif args[0] == SCICAT_URL + 'Datasets':
-            return MockResponse([{"pid": "gerwgwe",
-                                  "sourceFolderHost":"s3.my-bucket-name.fakecloud.com",
-                                  "sourceFolder":"myfile.txt"}], 200)
 
-        return MockResponse(None, 404)
+SCICAT_URL = app.config['SCICAT_URL']
 
+def mocked_requests_post(*args, **kwargs):
+
+
+    if args[0] == SCICAT_URL + 'Users/login':
+        return MockResponse({"id": "faketoken"}, 200)
+
+    return MockResponse(None, 404)
+
+def mocked_requests_get(*args, **kwargs):
+
+    if SCICAT_URL + 'Dataset' in args[0]:
+        return MockResponse({"pid": "my-fake-pid/123'",
+                             "sourceFolderHost":"s3.myfakebucket.somecloud.org",
+                             "sourceFolder": "myfile.txt"}, 200)
+
+    return MockResponse(None, 404)
 
 
 class ScicatUtilsTest(TestCase):
@@ -138,11 +145,14 @@ class ScicatUtilsTest(TestCase):
 
 
     @patch('hancock.scicat_utils.requests.post', side_effect = mocked_requests_post)
-    def test_get_associated_payload(self, mock_post):
-        mock_post.return_value = [{"pid": self.pid,
-                                  "sourceFolderHost":"s3.my-bucket-name.fakecloud.com",
-                                  "sourceFolder":"myfile.txt"}]
+    @patch('hancock.scicat_utils.requests.get', side_effect =mocked_requests_get)
+    def test_get_associated_payload(self, mock_post, mock_get):
+
         r = get_associated_payload(self.pid)
+        self.assertIn('pid', r.keys())
+        self.assertIn('sourceFolderHost', r.keys())
+        self.assertIn('sourceFolder', r.keys())
+
 
 
     def test_create_message(self):
