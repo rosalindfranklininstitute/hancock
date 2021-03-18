@@ -1,7 +1,7 @@
 from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
 from flask_restx import Resource, abort
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, jwt, auth_manager
+from hancock import api, jwt, auth_manager, app
 from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
@@ -28,6 +28,7 @@ class Token(Resource):
         try:
               auth_manager.authenticate_user(username, password)
         except AuthentificationFail as e:
+            app.logger.error(e)
             abort(401, "Bad username or password")
 
         # Create our JWTs
@@ -72,12 +73,12 @@ class ReceiveAsyncMessages(Resource):
     @api.expect(message_resource)
     @api.response(200, 'Job Complete')
     def post(self):
-        print(f"message received:{api.payload['async_message']}")
+        app.logger.info(f"message received:{api.payload['async_message']}")
         try:
             payload = ast.literal_eval(api.payload['async_message'])
             dataset_list = payload["datasetList"]
         except (SyntaxError, ValueError) as e:
-            print(e)
+            app.logger.debug(e)
             abort(401, "Invalid Message")
 
         if dataset_list:
@@ -92,7 +93,7 @@ class ReceiveAsyncMessages(Resource):
                         url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
                         url_ls.append(url[0])
                     except Exception as e:
-                        print(e)
+                        app.logger.debug(e)
                         continue
                     finally:
                         if not url_ls:
@@ -104,10 +105,10 @@ class ReceiveAsyncMessages(Resource):
 
         try:
             url_message = create_scicat_message(url_ls)
-            print('EMAIL created')
+            app.logger.info('EMAIL created')
             SMTPConnect.send_email(payload["emailJobInitiator"], message=url_message)
         except Exception as e:
-             print(e)
+             app.logger.debug(e)
              abort(406, "Unable to successfully send email")
 
         return 'Job Complete', 200

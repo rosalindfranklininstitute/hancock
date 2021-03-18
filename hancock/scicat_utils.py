@@ -32,8 +32,6 @@ def check_process_bucket_key(payload):
         return None
 
 
-
-
 def create_scicat_message(url_list):
 
     url_str = " \n "
