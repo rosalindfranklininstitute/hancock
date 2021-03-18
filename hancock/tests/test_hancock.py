@@ -4,7 +4,9 @@ from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
 from moto import mock_s3
-from hancock.scicat_utils import create_scicat_message
+from hancock.scicat_utils import create_scicat_message, get_associated_payload
+from unittest.mock import Mock, patch
+import requests
 
 TEST_USERNAME = "myservice1"
 TEST_PASSWORD = "weofnewofinoew"
@@ -105,7 +107,44 @@ class RetrieveUrlTest(TestCase):
                                     headers=make_headers(token))
         self.assertEqual(response.status_code, 404)
 
-class TestEmail(TestCase):
+
+
+
+def mocked_requests_post(*args, **kwargs):
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+
+            def json(self):
+                return self.json_data
+
+        SCICAT_URL = app.config['SCICAT_URL']
+        if args[0] == SCICAT_URL + 'Users/login':
+            return MockResponse({"id": "faketoken"}, 200)
+        elif args[0] == SCICAT_URL + 'Datasets':
+            return MockResponse([{"pid": "gerwgwe",
+                                  "sourceFolderHost":"s3.my-bucket-name.fakecloud.com",
+                                  "sourceFolder":"myfile.txt"}], 200)
+
+        return MockResponse(None, 404)
+
+
+
+class ScicatUtilsTest(TestCase):
+    def setUp(self):
+        self.pid ='my-fake-pid/123'
+
+
+
+    @patch('hancock.scicat_utils.requests.post', side_effect = mocked_requests_post)
+    def test_get_associated_payload(self, mock_post):
+        mock_post.return_value = [{"pid": self.pid,
+                                  "sourceFolderHost":"s3.my-bucket-name.fakecloud.com",
+                                  "sourceFolder":"myfile.txt"}]
+        r = get_associated_payload(self.pid)
+
+
     def test_create_message(self):
         url_list = [{'presigned_url':'url_1'}, {'presigned_url':'url_2'}, {'presigned_url':'url_3'}]
         message = create_scicat_message(url_list)

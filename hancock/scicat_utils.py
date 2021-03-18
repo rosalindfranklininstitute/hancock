@@ -5,11 +5,15 @@ from urllib.parse import urlparse
 
 SCICAT_URL = app.config['SCICAT_URL']
 
-def get_associated_payload(pid):
+def get_scicat_token():
     r = requests.post(SCICAT_URL + 'Users/login', json=dict(username='ingestor', password='aman'))
     scicat_token = r.json()['id']
-    query = json.dumps({"where": {"pid": pid}})
 
+    return scicat_token
+
+def get_associated_payload(pid):
+    scicat_token = get_scicat_token()
+    query = json.dumps({"where": {"pid": pid}})
     payload = requests.get(SCICAT_URL + "Datasets", params={"filter": query, "access_token": scicat_token})
     return payload.json()
 
