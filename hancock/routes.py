@@ -10,10 +10,9 @@ from .scicat_utils import get_associated_payload, create_scicat_message, check_p
 from .auth_utils import AuthentificationFail
 from .smtp_utils import SMTPConnect
 
-if app.config['URL_EXPIRATION']:
-    EXPIRATION = app.config['URL_EXPIRATION']
-else:
-    EXPIRATION = 24*60*60
+
+EXPIRATION = app.config['URL_EXPIRATION']
+
 
 @api.route('/ping')
 class Ping(Resource):
@@ -100,7 +99,7 @@ class ReceiveAsyncMessages(Resource):
                     except Exception as e:
                         app.logger.debug(e)
                         continue
-                    finally:
+                    else:
                         if not url_ls:
                             abort(406, "Failed to retrieve pre-signed url")
             else:

@@ -20,25 +20,25 @@ class Config(object):
     JWT_BLACKLIST_TOKEN_CHECKS = ['access']
 
     #Redis
-    HANCOCK_REDIS_HOST = os.environ.get('HANCOCK_REDIS_HOST')
+    HANCOCK_REDIS_HOST = os.environ['HANCOCK_REDIS_HOST']
 
     # Microservice auth
-    USER_SETUP_JSON = os.environ.get('USER_SETUP_JSON')
+    USER_SETUP_JSON = os.environ['USER_SETUP_JSON']
 
     #S3
-    S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')
-    ACCESS_KEY = os.environ.get('ACCESS_KEY')
-    SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
+    S3_ENDPOINT_URL = os.environ['S3_ENDPOINT_URL']
+    ACCESS_KEY = os.environ['ACCESS_KEY']
+    SECRET_ACCESS_KEY = os.environ['SECRET_ACCESS_KEY']
     CERTIFICATE_VERIFY = True
-    URL_EXPIRATION = os.environ.get('URL_EXPIRATION')
+    URL_EXPIRATION = os.environ.get('URL_EXPIRATION', default=24*60*60)
 
     #SCICAT
-    SCICAT_URL = os.environ.get('SCICAT_URL')
+    SCICAT_URL = os.environ['SCICAT_URL']
 
     # SMTP
-    SMTP_SERVER = os.environ.get('SMTP_SERVER')
-    SMTP_PORT = os.environ.get('SMTP_PORT')
-    SMTP_LOGIN_USER = os.environ.get('SMTP_LOGIN_USER')
-    SMTP_LOGIN_PASSWORD = os.environ.get('SMTP_LOGIN_PASSWORD')
-    SMTP_SENDER_EMAIL = os.environ.get('SMTP_SENDER_EMAIL')
-    EMAIL_BODY_FILE = os.environ.get('EMAIL_BODY_FILE')
+    SMTP_SERVER = os.environ['SMTP_SERVER']
+    SMTP_PORT = os.environ['SMTP_PORT']
+    SMTP_LOGIN_USER = os.environ['SMTP_LOGIN_USER']
+    SMTP_LOGIN_PASSWORD = os.environ['SMTP_LOGIN_PASSWORD']
+    SMTP_SENDER_EMAIL = os.environ['SMTP_SENDER_EMAIL']
+    EMAIL_BODY_FILE = os.environ['EMAIL_BODY_FILE']
