@@ -48,5 +48,6 @@ jobs:
          SECRET_ACCESS_KEY: N0T4R34LS3CR3TACC3SSK3Y
          HANCOCK_REDIS_HOST: localhost
          EMAIL_BODY_FILE: hancock/tests/config/email_body_file.txt
+         SCICAT_URL: https://scicat-dev.rfi.ac.uk
       run: |
         nose2 -v --log-level DEBUG
