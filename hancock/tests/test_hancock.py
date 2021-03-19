@@ -108,7 +108,7 @@ class RetrieveUrlTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class TestEmail(TestCase):
+class TestScicatUtils(TestCase):
     def test_create_message(self):
         url_list = [{'presigned_url':'url_1'}, {'presigned_url':'url_2'}, {'presigned_url':'url_3'}]
         message = create_scicat_message(url_list)
@@ -116,12 +116,14 @@ class TestEmail(TestCase):
         self.assertIsInstance(message, bytes)
 
 
+
 class SMTPUtilsTest(TestCase):
     def setUp(self) -> None:
         pass
 
     def test_create_email(self):
-        url_bytes_io = bytes('https://myfake_presigned_url.com_EGETTENASJFCD', 'ascii')
+        url_list = [{'presigned_url': 'url_1'}, {'presigned_url': 'url_2'}, {'presigned_url': 'url_3'}]
+        url_bytes_io = create_scicat_message(url_list)
         main_body_file = "config/test_email_file.txt"
         message = create_email('myemail@gmail.com', main_body_file, attachment_bytes= url_bytes_io)
         self.assertIn("Content-Type: multipart/mixed", message)

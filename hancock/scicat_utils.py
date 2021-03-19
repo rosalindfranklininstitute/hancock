@@ -28,8 +28,7 @@ def check_and_process_payload(payload):
 
 
 def create_scicat_message(url_list):
-    url_str =""
+    url_str = ""
     for url in url_list:
-        url_str = url['presigned_url'] + '\n'
-
+        url_str = url_str + url['presigned_url'] + '\n'
     return bytes(url_str,'ascii')

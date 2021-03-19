@@ -25,7 +25,7 @@ class SMTPConnect:
         return server
 
     @classmethod
-    def send_email(cls,  to_address, url_string_io, main_body):
+    def send_email(cls,  to_address, main_body, url_string_io):
         message = create_email(to_address, main_body, url_string_io)
         server = cls.connect_to_smtp()
         server.sendmail(from_addr=app.config['SMTP_SENDER_EMAIL'], to_addrs=to_address, msg=message)
