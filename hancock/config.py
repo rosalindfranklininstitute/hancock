@@ -24,11 +24,13 @@ class Config(object):
 
     # Microservice auth
     USER_SETUP_JSON = os.environ.get('USER_SETUP_JSON')
+
     #S3
     S3_ENDPOINT_URL = os.environ.get('S3_ENDPOINT_URL')
     ACCESS_KEY = os.environ.get('ACCESS_KEY')
     SECRET_ACCESS_KEY = os.environ.get('SECRET_ACCESS_KEY')
-    CERTIFICATE_VERIFY= True
+    CERTIFICATE_VERIFY = True
+    URL_EXPIRATION = os.environ.get('URL_EXPIRATION')
 
     #SCICAT
     SCICAT_URL = os.environ.get('SCICAT_URL')

@@ -10,6 +10,10 @@ from .scicat_utils import get_associated_payload, create_scicat_message, check_p
 from .auth_utils import AuthentificationFail
 from .smtp_utils import SMTPConnect
 
+if app.config['URL_EXPIRATION']:
+    EXPIRATION = app.config['URL_EXPIRATION']
+else:
+    EXPIRATION = 24*60*60
 
 @api.route('/ping')
 class Ping(Resource):
@@ -62,9 +66,10 @@ class FetchUrl(Resource):
     @api.marshal_with(url_resource)
     @jwt_required()
     def post(self):
-      S3Operations.client_options()
-      response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
-      return response
+        S3Operations.client_options()
+        response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'],
+                                                       Expiration=EXPIRATION)
+        return response
 
 @api.route('/receive_async_messages')
 
