@@ -4,13 +4,10 @@ from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
 from moto import mock_s3
-<<<<<<< HEAD
-from hancock.scicat_utils import create_scicat_message
 from hancock.smtp_utils import create_email
-=======
 from hancock.scicat_utils import create_scicat_message, get_associated_payload
 from unittest.mock import patch
->>>>>>> error-handling
+
 
 
 TEST_USERNAME = "myservice1"
@@ -117,7 +114,6 @@ class RetrieveUrlTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-class TestScicatUtils(TestCase):
 
 
 class MockResponse:
