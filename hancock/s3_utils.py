@@ -22,14 +22,14 @@ class S3Operations:
               s3_client = boto3.client('s3', **cls.client_options())
 
         except ClientError as e:
-             print(e)
+             app.logger.debug(e)
              return {'presigned_url': None}, 404
 
         # check bucket and object exist
         try:
              s3_client.head_object(Bucket=Bucket, Key=Key)
         except ClientError as e:
-             print(e)
+             app.logger.debug(e)
              return {'presigned_url': None}, 404
 
         try:
@@ -38,7 +38,7 @@ class S3Operations:
                                                                 'Key': Key},
                                                         ExpiresIn=Expiration)
         except ClientError as e:
-                 print(e)
+                 app.logger.debug(e)
                  return {'presigned_url': None}, 404
 
         return {'presigned_url': url}, 200

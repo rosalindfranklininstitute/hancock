@@ -4,8 +4,13 @@ from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 import boto3
 from moto import mock_s3
+<<<<<<< HEAD
 from hancock.scicat_utils import create_scicat_message
 from hancock.smtp_utils import create_email
+=======
+from hancock.scicat_utils import create_scicat_message, get_associated_payload
+from unittest.mock import patch
+>>>>>>> error-handling
 
 
 TEST_USERNAME = "myservice1"
@@ -68,6 +73,10 @@ class LoginTest(TestCase):
         response = self.client.post('/api/token', json=dict(password='jaewjfpewqjfjpewp'))
         self.assertEqual(response.status_code, 400)
 
+        response = self.client.post('/api/token', json=dict(username='myservice1', password='jeawjfpfjewf'))
+        self.assertEqual(response.status_code, 401)
+
+
 @mock_s3
 class RetrieveUrlTest(TestCase):
 
@@ -109,6 +118,58 @@ class RetrieveUrlTest(TestCase):
 
 
 class TestScicatUtils(TestCase):
+
+
+class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+
+            def json(self):
+                return self.json_data
+
+
+class MockResponse:
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
+SCICAT_URL = app.config['SCICAT_URL']
+
+
+def mocked_requests_post(*args, **kwargs):
+    if args[0] == SCICAT_URL + 'Users/login':
+        return MockResponse({"id": "faketoken"}, 200)
+
+    return MockResponse(None, 404)
+
+
+def mocked_requests_get(*args, **kwargs):
+    if SCICAT_URL + 'Dataset' in args[0]:
+        return MockResponse({"pid": "my-fake-pid/123'",
+                             "sourceFolderHost": "s3.myfakebucket.somecloud.org",
+                             "sourceFolder": "myfile.txt"}, 200)
+
+    return MockResponse(None, 404)
+
+
+class ScicatUtilsTest(TestCase):
+    def setUp(self):
+        self.pid = 'my-fake-pid/123'
+
+    @patch('hancock.scicat_utils.requests.post', side_effect=mocked_requests_post)
+    @patch('hancock.scicat_utils.requests.get', side_effect=mocked_requests_get)
+    def test_get_associated_payload(self, mock_post, mock_get):
+        r = get_associated_payload(self.pid)
+        self.assertIn('pid', r.keys())
+        self.assertIn('sourceFolderHost', r.keys())
+        self.assertIn('sourceFolder', r.keys())
+
+
     def test_create_message(self):
         url_list = [{'presigned_url':'url_1'}, {'presigned_url':'url_2'}, {'presigned_url':'url_3'}]
         message = create_scicat_message(url_list)
