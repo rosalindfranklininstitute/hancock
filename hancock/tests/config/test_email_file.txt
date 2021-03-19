@@ -1,0 +1,7 @@
+Hi Tester,
+
+Running tests is good !
+
+Please continue
+Regards
+hancock

@@ -122,6 +122,7 @@ class SMTPUtilsTest(TestCase):
 
     def test_create_email(self):
         url_bytes_io = bytes('https://myfake_presigned_url.com_EGETTENASJFCD', 'ascii')
-        message = create_email('myemail@gmail.com', url_bytes_io)
+        main_body_file = "config/test_email_file.txt"
+        message = create_email('myemail@gmail.com', main_body_file, attachment_bytes= url_bytes_io)
         self.assertIn("Content-Type: multipart/mixed", message)
         self.assertIn('To: myemail@gmail.com', message)

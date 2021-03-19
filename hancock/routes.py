@@ -1,7 +1,7 @@
 from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
 from flask_restx import Resource, abort
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, jwt, auth_manager
+from hancock import api, jwt, auth_manager, app
 from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
@@ -99,7 +99,7 @@ class ReceiveAsyncMessages(Resource):
         try:
             url_bytes_io = create_scicat_message(url_ls)
             app.logger.info('EMAIL created')
-            SMTPConnect.send_email(payload["emailJobInitiator"], url_string_io=url_bytes_io)
+            SMTPConnect.send_email(payload["emailJobInitiator"], app.config['EMAIL_BODY_FILE'], url_string_io=url_bytes_io)
         except Exception as e:
              app.logger.debug(e)
              abort(406, "Unable to successfully send email")
