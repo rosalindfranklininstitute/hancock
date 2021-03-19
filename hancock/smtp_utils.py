@@ -41,7 +41,7 @@ def create_email(to_address, main_body_file=None,  attachment_bytes=None):
             with open(main_body_file) as f:
                 main_body = f.read()
         except Exception as e:
-            app.logge.debug(e)
+            app.logger.debug(e)
             app.logger.info("Main body message could not be read defaulting to simple message")
             main_body = default_message
 
