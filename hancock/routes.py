@@ -1,14 +1,17 @@
 from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
 from flask_restx import Resource, abort
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
-from hancock import api, jwt, auth_manager
+from hancock import api, jwt, auth_manager, app
 from hancock.config import ACCESS_EXPIRES
 from .redis_utils import revoked_store
 from .s3_utils import S3Operations
 import ast
-from .scicat_utils import get_associated_payload
-from urllib.parse import urlparse
+from .scicat_utils import get_associated_payload, create_scicat_message, check_process_bucket_key
 from .auth_utils import AuthentificationFail
+from .smtp_utils import SMTPConnect
+
+
+EXPIRATION = app.config['URL_EXPIRATION']
 
 
 @api.route('/ping')
@@ -28,6 +31,7 @@ class Token(Resource):
         try:
               auth_manager.authenticate_user(username, password)
         except AuthentificationFail as e:
+            app.logger.error(e)
             abort(401, "Bad username or password")
 
         # Create our JWTs
@@ -61,37 +65,58 @@ class FetchUrl(Resource):
     @api.marshal_with(url_resource)
     @jwt_required()
     def post(self):
-      S3Operations.client_options()
-      response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'])
-
-      return response
+        S3Operations.client_options()
+        response = S3Operations.generate_presigned_url(Bucket=api.payload['Bucket'], Key=api.payload['Key'],
+                                                       Expiration=EXPIRATION)
+        return response
 
 @api.route('/receive_async_messages')
+
 class ReceiveAsyncMessages(Resource):
     @jwt_required()
     @api.expect(message_resource)
-    @api.marshal_with(url_resource, as_list=True)
+    @api.response(200, 'Job Complete')
     def post(self):
-        print(f"message received:{api.payload['async_message']}")
-        payload = ast.literal_eval(api.payload['async_message'])
-        datasetList = payload["datasetList"]
-        output_ls = []
-        for item in datasetList:
-             output = get_associated_payload(item['pid'])
-             output_ls.append(output)
-        url_ls=[]
-        if output_ls:
-            for output in output_ls:
-                bucket = urlparse(output[0]['sourceFolderHost'])[1].split('.')[0]
-                key = output[0]['sourceFolder'].strip('/')
-                S3Operations.client_options()
-                url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
-                url_ls.append(url[0])
-        else:
-            print('cannot retrieve information')
-            return None
+        app.logger.info(f"message received:{api.payload['async_message']}")
+        try:
+            payload = ast.literal_eval(api.payload['async_message'])
+            dataset_list = payload["datasetList"]
+        except (SyntaxError, ValueError) as e:
+            app.logger.debug(e)
+            abort(401, "Invalid Message")
 
-        return url_ls, 200
+        if dataset_list:
+            output_ls = [get_associated_payload(item['pid']) for item in dataset_list]
+
+            url_ls = []
+            if output_ls:
+                for output in output_ls:
+                    try:
+                        bucket, key = check_process_bucket_key(output[0])
+                        S3Operations.client_options()
+                        url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
+                        url_ls.append(url[0])
+                    except Exception as e:
+                        app.logger.debug(e)
+                        continue
+                    else:
+                        if not url_ls:
+                            abort(406, "Failed to retrieve pre-signed url")
+            else:
+                abort(406, "Failed to retrieve dataset information")
+        else:
+            abort(406, "Cannot retrieve dataset list")
+
+        try:
+            url_bytes_io = create_scicat_message(url_ls)
+            app.logger.info('EMAIL created')
+            SMTPConnect.send_email(payload["emailJobInitiator"], app.config['EMAIL_BODY_FILE'], url_string_io=url_bytes_io)
+        except Exception as e:
+             app.logger.debug(e)
+             abort(406, "Unable to successfully send email")
+
+
+        return 'Job Complete', 200
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):
@@ -100,7 +125,6 @@ def check_if_token_is_revoked(jwt_header, decrypted_token):
     if entry is None:
         return True
     return entry == 'true'
-
 
 
 

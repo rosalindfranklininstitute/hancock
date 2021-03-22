@@ -7,3 +7,4 @@ logs
 log/*.log
 *.db
 config/users.json
+tests/logs

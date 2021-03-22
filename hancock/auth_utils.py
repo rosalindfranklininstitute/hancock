@@ -49,8 +49,7 @@ class AuthManager:
         try:
             user = self.Users[username]
             user.check_password(password)
-            self.user = user
-            if not user.is_authenticated:
+            if user.auth_status == False:
                 raise AuthentificationFail('invalid username or password')
         except Exception as e:
             raise AuthentificationFail('invalid username or password')
@@ -63,6 +62,7 @@ class User(UserMixin):
     def __init__(self, username, password):
         self.username = username
         self.password_hash = self.set_password(password)
+        self.auth_status = False
 
 
     def set_password(self, password):
@@ -70,7 +70,10 @@ class User(UserMixin):
         return password_hash
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+      self.auth_status = check_password_hash(self.password_hash, password)
+
+
+
 
 
 
