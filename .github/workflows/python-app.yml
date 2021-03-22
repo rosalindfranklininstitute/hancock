@@ -52,6 +52,7 @@ jobs:
          SMTP_SERVER: 'smtp.fake.server'
          SMTP_PORT: 587
          SMTP_LOGIN_PASSWORD: 'smtppass'
+         SMTP_LOGIN_USER: 'myuser'
          SMTP_SENDER_EMAIL: 'myemail@fakesmtp.com'
       run: |
         nose2 -v --log-level DEBUG
