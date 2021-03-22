@@ -49,5 +49,6 @@ jobs:
          HANCOCK_REDIS_HOST: localhost
          EMAIL_BODY_FILE: hancock/tests/config/test_email_file.txt
          SCICAT_URL: 'https://scicat-dev.rfi.ac.uk'
+         SMTP_SERVER: None
       run: |
         nose2 -v --log-level DEBUG

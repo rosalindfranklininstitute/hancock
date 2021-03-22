@@ -41,4 +41,4 @@ class Config(object):
     SMTP_LOGIN_USER = os.environ['SMTP_LOGIN_USER']
     SMTP_LOGIN_PASSWORD = os.environ['SMTP_LOGIN_PASSWORD']
     SMTP_SENDER_EMAIL = os.environ['SMTP_SENDER_EMAIL']
-    EMAIL_BODY_FILE = os.environ['EMAIL_BODY_FILE']
+    EMAIL_BODY_FILE = os.environ.get('EMAIL_BODY_FILE', default='config/email_body_file.txt')
