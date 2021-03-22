@@ -19,7 +19,7 @@ class S3Operations:
     def generate_presigned_url(cls, Bucket, Key, Expiration=900):
 
         try:
-              s3_client = boto3.client('s3', **cls.client_options())
+              s3 = boto3.resource('s3', **cls.client_options())
 
         except ClientError as e:
              app.logger.debug(e)
@@ -27,18 +27,22 @@ class S3Operations:
 
         # check bucket and object exist
         try:
-             s3_client.head_object(Bucket=Bucket, Key=Key)
+
+            bucket = s3.Bucket(Bucket)
+            objs = bucket.objects.filter(Prefix=Key)
         except ClientError as e:
              app.logger.debug(e)
              return {'presigned_url': None}, 404
 
         try:
-            url = s3_client.generate_presigned_url('get_object',
-                                                        Params={'Bucket': Bucket,
-                                                                'Key': Key},
-                                                        ExpiresIn=Expiration)
+            url_ls =[]
+            for obj in objs.all():
+                url_ls.append(s3.meta.client.generate_presigned_url('get_object',
+                                                            Params={'Bucket': Bucket,
+                                                                    'Key': obj.key},
+                                                            ExpiresIn=Expiration))
         except ClientError as e:
                  app.logger.debug(e)
                  return {'presigned_url': None}, 404
 
-        return {'presigned_url': url}, 200
+        return {'presigned_url': url_ls}, 200

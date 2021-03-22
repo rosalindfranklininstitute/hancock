@@ -2,6 +2,7 @@ import requests
 import json
 from hancock import app
 from urllib.parse import urlparse
+import itertools
 
 SCICAT_URL = app.config['SCICAT_URL']
 
@@ -33,7 +34,8 @@ def check_process_bucket_key(payload):
 
 
 def create_scicat_message(url_list):
+
     url_str = ""
     for url in url_list:
-        url_str = url_str + url['presigned_url'] + '\n'
+            url_str = url_str + "\n".join(url['presigned_url']) +"\n"
     return bytes(url_str,'ascii')

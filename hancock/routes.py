@@ -89,6 +89,7 @@ class ReceiveAsyncMessages(Resource):
             output_ls = [get_associated_payload(item['pid']) for item in dataset_list]
 
             url_ls = []
+            app.logger.info('retrieving presigned url list')
             if output_ls:
                 for output in output_ls:
                     try:

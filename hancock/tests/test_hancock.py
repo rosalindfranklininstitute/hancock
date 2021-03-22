@@ -83,6 +83,8 @@ class RetrieveUrlTest(TestCase):
         # We need to create the bucket since this is all in Moto's 'virtual' AWS account
         self.conn.create_bucket(Bucket='rfi-test-bucket-abc')
         self.conn.Object('rfi-test-bucket-abc','myfileobj.txt').put()
+        self.conn.Object('rfi-test-bucket-abc','dir_1/myfileobj.txt').put()
+        self.conn.Object('rfi-test-bucket-abc', 'dir_1/myfileobj2.txt').put()
         creds = self.session.get_credentials()
         app.config['ACCESS_KEY'] = creds.access_key
         app.config['SECRET_ACCESS_KEY'] = creds.secret_key
@@ -90,6 +92,8 @@ class RetrieveUrlTest(TestCase):
 
     def tearDown(self) -> None:
         self.conn.Object('rfi-test-bucket-abc', 'myfileobj.txt').delete()
+        self.conn.Object('rfi-test-bucket-abc','dir_1/myfileobj.txt').delete()
+        self.conn.Object('rfi-test-bucket-abc', 'dir_1/myfileobj2.txt').delete()
         self.conn.Bucket('rfi-test-bucket-abc').delete()
         self.client.delete()
 
@@ -105,6 +109,17 @@ class RetrieveUrlTest(TestCase):
         print(response.json)
         self.assertTrue('http' in response.json['presigned_url'])
 
+    def test_successful_dir_retrieval(self):
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
+        token = response.get_json()['access_token']
+        response = self.client.post('/api/fetch_url',
+                                    json=dict(Bucket='rfi-test-bucket-abc', Key='dir_1'),
+                                    headers=make_headers(token))
+
+        self.assertNotEqual(response.status_code, '200')
+        self.assertTrue('http' in response.json['presigned_url'])
+        self.assertTrue(len(response.json['presigned_url']), 2)
+
     def test_bad_retrieval(self):
         response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
         token = response.get_json()['access_token']
@@ -112,8 +127,6 @@ class RetrieveUrlTest(TestCase):
                                     json=dict(Bucket='rfi-test-bucket-485', Key='notmyfileobj.txt'),
                                     headers=make_headers(token))
         self.assertEqual(response.status_code, 404)
-
-
 
 
 class MockResponse:
@@ -158,11 +171,11 @@ class ScicatUtilsTest(TestCase):
 
 
     def test_create_message(self):
-        url_list = [{'presigned_url':'url_1'}, {'presigned_url':'url_2'}, {'presigned_url':'url_3'}]
+        url_list = [{'presigned_url': ['url_1', 'url_2']}, {'presigned_url': ['url_3']}]
         message = create_scicat_message(url_list)
+        print(message)
         self.assertNotEqual(message, None)
         self.assertIsInstance(message, bytes)
-
 
 
 class SMTPUtilsTest(TestCase):
