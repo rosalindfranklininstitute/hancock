@@ -53,6 +53,5 @@ jobs:
          SMTP_PORT: None
          SMTP_LOGIN_PASSWORD: None
          SMTP_SENDER_EMAIL: None
-         EMAIL_BODY_FILE: None
       run: |
         nose2 -v --log-level DEBUG
