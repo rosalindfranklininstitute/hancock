@@ -25,12 +25,19 @@ def check_process_bucket_key(payload):
     params:
          payload: the payload returned from scicat datasets query
     """
+
     if ('sourceFolderHost' and 'sourceFolder') in payload.keys():
         bucket = urlparse(payload['sourceFolderHost'])[1].split('.')[0]
         key = payload['sourceFolder'].strip('/')
-        return bucket, key
+        if not bucket:
+            app.logger.debug('source folder host could not be parsed')
+            return {}
+        if not key:
+            app.logger.debug('source folder could not be parsed')
+            return {}
+        return dict(bucket=bucket, key=key)
     else:
-        return None
+        return {}
 
 
 def create_scicat_message(url_list):

@@ -29,7 +29,7 @@ if not app.debug:
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
 
-        app.logger.setLevel(logging.INFO)
+        app.logger.setLevel(logging.DEBUG)
         app.logger.info('HANCOCK START UP')
         app.logger.info(f'Scicat URL connection: {app.config["SCICAT_URL"]}')
         app.logger.info(f'redis connection: {app.config["HANCOCK_REDIS_HOST"]}')

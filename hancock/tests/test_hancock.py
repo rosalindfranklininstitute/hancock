@@ -5,7 +5,7 @@ from flask_restx import Resource
 import boto3
 from moto import mock_s3
 from hancock.smtp_utils import create_email
-from hancock.scicat_utils import create_scicat_message, get_associated_payload
+from hancock.scicat_utils import create_scicat_message, get_associated_payload, check_process_bucket_key
 from unittest.mock import patch
 
 
@@ -128,6 +128,15 @@ class RetrieveUrlTest(TestCase):
                                     headers=make_headers(token))
         self.assertEqual(response.status_code, 404)
 
+    def test_fetch_url_from_source(self):
+        sourceFolder = 'myfileobj.txt'
+        sourceFolderHost = 'http://rfi-test-bucket-abc.s3.amazonaws.com'
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
+        token = response.get_json()['access_token']
+        response = self.client.post('api/fetch_url_from_source', json=dict(sourceFolder=sourceFolder, sourceFolderHost=sourceFolderHost),
+                         headers=make_headers(token))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('http', response.json['presigned_url'])
 
 class MockResponse:
             def __init__(self, json_data, status_code):
@@ -177,6 +186,19 @@ class ScicatUtilsTest(TestCase):
         self.assertNotEqual(message, None)
         self.assertIsInstance(message, bytes)
 
+    def test_check_process_bucket_key(self):
+        payload = {"pid": "my-fake-pid/123'",
+                   "sourceFolderHost":"https://myfakebucket.somecloud.org",
+                   "sourceFolder": "myfile.txt"}
+
+        bucket, key = check_process_bucket_key(payload)
+        self.assertEqual(bucket, "myfakebucket")
+        self.assertEqual(key, 'myfile.txt')
+        unparseable_payload ={"pid": "my-fake-pid/123'",
+                   "sourceFolderHost":"s3,myfakebucket.somecloud.org",
+                   "sourceFolder": "myfile.txt"}
+        bucket, key = check_process_bucket_key(unparseable_payload)
+        self.assertEqual(bucket, None)
 
 class SMTPUtilsTest(TestCase):
     def setUp(self) -> None:
