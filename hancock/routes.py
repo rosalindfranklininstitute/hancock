@@ -10,7 +10,7 @@ import ast
 from .scicat_utils import get_associated_payload, create_scicat_message, check_process_bucket_key
 from .auth_utils import AuthentificationFail
 from .smtp_utils import SMTPConnect
-
+from flask import jsonify
 
 EXPIRATION = app.config['URL_EXPIRATION']
 
@@ -18,7 +18,7 @@ EXPIRATION = app.config['URL_EXPIRATION']
 @api.route('/ping')
 class Ping(Resource):
     def get(self):
-        return {'hi':'there'}
+        return jsonify({"hi": "there"})
 
 @api.route('/token')
 class Token(Resource):

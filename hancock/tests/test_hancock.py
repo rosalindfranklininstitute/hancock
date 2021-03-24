@@ -198,7 +198,7 @@ class ScicatUtilsTest(TestCase):
                    "sourceFolderHost":"s3,myfakebucket.somecloud.org",
                    "sourceFolder": "myfile.txt"}
         obj = check_process_bucket_key(unparseable_payload)
-        self.assertEqual(obj, None)
+        self.assertEqual(obj,{})
 
 class SMTPUtilsTest(TestCase):
     def setUp(self) -> None:
