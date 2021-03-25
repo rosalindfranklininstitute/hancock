@@ -211,3 +211,4 @@ class SMTPUtilsTest(TestCase):
         message = create_email('myemail@gmail.com', main_body_file, attachment_bytes= url_bytes_io)
         self.assertIn("Content-Type: multipart/mixed", message)
         self.assertIn('To: myemail@gmail.com', message)
+

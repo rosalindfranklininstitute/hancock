@@ -18,7 +18,7 @@ EXPIRATION = app.config['URL_EXPIRATION']
 @api.route('/ping')
 class Ping(Resource):
     def get(self):
-        return jsonify({"hi": "there"})
+        return {"hi": "there"}
 
 
 
@@ -51,7 +51,7 @@ class Token(Resource):
         revoked_store.set(access_jti, 'false', ACCESS_EXPIRES * 1.2)
 
         ret = {
-            'access_token': access_token,
+            'access_token': access_token
         }
         return ret, 201
 
@@ -117,7 +117,7 @@ class ReceiveAsyncMessages(Resource):
                         obj = check_process_bucket_key(output[0])
                         S3Operations.client_options()
                         url = S3Operations.generate_presigned_url(Bucket=obj['bucket'], Key=obj['key'])
-                        url_ls.append(url)
+                        url_ls.append(url[0])
                     except Exception as e:
                         app.logger.debug(e)
                         continue
