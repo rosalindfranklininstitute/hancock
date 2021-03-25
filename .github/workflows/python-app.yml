@@ -51,7 +51,7 @@ jobs:
          SCICAT_URL: 'https://scicat-dev.rfi.ac.uk'
          SMTP_SERVER: 'smtp.gmail.com'
          SMTP_PORT: 587
-         SMTP_LOGIN_PASSWORD: 'smtppass'
+         SMTP_LOGIN_PASSWORD: ${{secrets.SMTP_LOGIN_PASSWORD}}
          SMTP_LOGIN_USER: 'thefranklin.development@gmail.com'
          SMTP_SENDER_EMAIL: 'thefranklin.development@gmail.com'
       run: |
