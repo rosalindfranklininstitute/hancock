@@ -11,7 +11,7 @@ from .scicat_utils import get_associated_payload, create_scicat_message, check_p
 from .auth_utils import AuthentificationFail
 from .smtp_utils import SMTPConnect
 from flask import jsonify
-
+from flask_cors import cross_origin
 EXPIRATION = app.config['URL_EXPIRATION']
 
 
@@ -20,7 +20,10 @@ class Ping(Resource):
     def get(self):
         return jsonify({"hi": "there"})
 
+
+
 @api.route('/token')
+
 class Token(Resource):
     @api.expect(auth_creds_resource)
     @api.marshal_with(token_resource, code=201, description='The new access token')
@@ -111,9 +114,9 @@ class ReceiveAsyncMessages(Resource):
             if output_ls:
                 for output in output_ls:
                     try:
-                        bucket, key = check_process_bucket_key(output[0])
+                        obj = check_process_bucket_key(output[0])
                         S3Operations.client_options()
-                        url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
+                        url = S3Operations.generate_presigned_url(Bucket=obj['bucket'], Key=obj['key'])
                         url_ls.append(url[0])
                     except Exception as e:
                         app.logger.debug(e)

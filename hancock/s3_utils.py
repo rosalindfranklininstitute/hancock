@@ -1,6 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
 from hancock import app
+from flask import jsonify
 
 class S3Operations:
     @classmethod
@@ -27,7 +28,6 @@ class S3Operations:
 
         # check bucket and object exist
         try:
-
             bucket = s3.Bucket(Bucket)
             objs = bucket.objects.filter(Prefix=Key)
 
@@ -47,4 +47,4 @@ class S3Operations:
                  app.logger.debug(e)
                  return {'presigned_url': None}, 404
 
-        return {'presigned_url': url_ls}, 200
+        return {'presigned_url': jsonify(url_ls)}, 200
