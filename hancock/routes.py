@@ -1,4 +1,5 @@
-from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource
+from .models import auth_creds_resource, token_resource, object_info_resource, url_resource, message_resource, \
+                    sourcefolder_resource
 from flask_restx import Resource, abort
 from flask_jwt_extended import (create_access_token, get_jti, jwt_required)
 from hancock import api, jwt, auth_manager, app
@@ -9,21 +10,25 @@ import ast
 from .scicat_utils import get_associated_payload, create_scicat_message, check_process_bucket_key
 from .auth_utils import AuthentificationFail
 from .smtp_utils import SMTPConnect
-
-
+from flask import jsonify
+from flask_cors import cross_origin
 EXPIRATION = app.config['URL_EXPIRATION']
 
 
 @api.route('/ping')
 class Ping(Resource):
     def get(self):
-        return {'hi':'there'}
+        return {"hi": "there"}
+
+
 
 @api.route('/token')
+
 class Token(Resource):
     @api.expect(auth_creds_resource)
     @api.marshal_with(token_resource, code=201, description='The new access token')
-    @api.doc(description='Create a new access token by providing a username and password that will be used for authenticating against an LDAP database')
+    @api.doc(description='Create a new access token by providing a username and password that will be used for '
+                         'authenticating against an LDAP database')
     def post(self):
         username = api.payload['username']
         password = api.payload['password']
@@ -46,10 +51,9 @@ class Token(Resource):
         revoked_store.set(access_jti, 'false', ACCESS_EXPIRES * 1.2)
 
         ret = {
-            'access_token': access_token,
+            'access_token': access_token
         }
         return ret, 201
-
 
     @api.expect(token_resource)
     @api.response(204, 'Token deleted')
@@ -58,6 +62,7 @@ class Token(Resource):
         access_jti = get_jti(encoded_token=api.payload['access_token'])
         revoked_store.set(access_jti, 'true', ACCESS_EXPIRES * 1.2)
         return '', 204
+
 
 @api.route('/fetch_url')
 class FetchUrl(Resource):
@@ -70,8 +75,24 @@ class FetchUrl(Resource):
                                                        Expiration=EXPIRATION)
         return response
 
-@api.route('/receive_async_messages')
 
+@api.route('/fetch_url_from_source')
+class FetchUrlFromSource(Resource):
+    @api.expect(sourcefolder_resource)
+    @api.marshal_with(url_resource)
+    @jwt_required()
+    def post(self):
+        obj_info = check_process_bucket_key(api.payload)
+        S3Operations.client_options()
+        app.logger.info(obj_info)
+        response = S3Operations.generate_presigned_url(Bucket=obj_info['bucket'],
+                                                       Key=obj_info['key'],
+                                                       Expiration=EXPIRATION)
+        return response
+
+
+
+@api.route('/receive_async_messages')
 class ReceiveAsyncMessages(Resource):
     @jwt_required()
     @api.expect(message_resource)
@@ -83,31 +104,38 @@ class ReceiveAsyncMessages(Resource):
             dataset_list = payload["datasetList"]
         except (SyntaxError, ValueError) as e:
             app.logger.debug(e)
-            abort(401, "Invalid Message")
+            abort(406, "Invalid Message")
 
         if dataset_list:
             output_ls = [get_associated_payload(item['pid']) for item in dataset_list]
-
             url_ls = []
-            if output_ls:
+            app.logger.info('retrieving presigned-url list')
+            if not any(output_ls):
+                SMTPConnect.send_error_email(payload["emailJobInitiator"])
+                abort(406, "Failed to retrieve dataset information")
+            else:
                 for output in output_ls:
                     try:
-                        bucket, key = check_process_bucket_key(output[0])
+                        obj = check_process_bucket_key(output[0])
                         S3Operations.client_options()
-                        url = S3Operations.generate_presigned_url(Bucket=bucket, Key=key)
+                        url = S3Operations.generate_presigned_url(Bucket=obj['bucket'], Key=obj['key'])
                         url_ls.append(url[0])
                     except Exception as e:
                         app.logger.debug(e)
                         continue
                     else:
                         if not url_ls:
+                            SMTPConnect.send_error_email(payload["emailJobInitiator"])
                             abort(406, "Failed to retrieve pre-signed url")
-            else:
-                abort(406, "Failed to retrieve dataset information")
+
+
+
         else:
+            SMTPConnect.send_error_email(payload["emailJobInitiator"])
             abort(406, "Cannot retrieve dataset list")
 
         try:
+            app.logger.info(url_ls)
             url_bytes_io = create_scicat_message(url_ls)
             app.logger.info('EMAIL created')
             SMTPConnect.send_email(payload["emailJobInitiator"], app.config['EMAIL_BODY_FILE'], url_string_io=url_bytes_io)
@@ -117,6 +145,7 @@ class ReceiveAsyncMessages(Resource):
 
 
         return 'Job Complete', 200
+
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, decrypted_token):

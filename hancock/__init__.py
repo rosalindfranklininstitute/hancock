@@ -6,6 +6,7 @@ from hancock.auth_utils import AuthManager
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
 
@@ -17,6 +18,11 @@ api = Api(app, version='0.1', title='Hancock API',
 
 jwt = JWTManager(app)
 
+#use cors to be able to connect from catanie
+if app.config['CORS_RESOURCES']:
+        cors = CORS(app, resources=app.config['CORS_RESOURCES'])
+else:
+        cors = CORS(app)
 
 auth_manager = AuthManager(app)
 
@@ -29,7 +35,7 @@ if not app.debug:
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
 
-        app.logger.setLevel(logging.INFO)
+        app.logger.setLevel(logging.DEBUG)
         app.logger.info('HANCOCK START UP')
         app.logger.info(f'Scicat URL connection: {app.config["SCICAT_URL"]}')
         app.logger.info(f'redis connection: {app.config["HANCOCK_REDIS_HOST"]}')

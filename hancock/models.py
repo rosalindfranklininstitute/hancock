@@ -23,3 +23,8 @@ url_resource = api.model('PresignedUrl', {
 message_resource = api.model('AsynchronousMessage', {
                                 'async_message': fields.String(description="message from rabbitMQ",
                                                                required=True)})
+
+sourcefolder_resource = api.model('SourceFolder', {'sourceFolder': fields.String(description="sourceFolder field from catamel,"
+                                                                                             "more generally, this is the key"),
+                                                   'sourceFolderHost': fields.String(description="sourceFolderHost field from catamel, "
+                                                                                                 "more generally , this is the url for the bucket.")})

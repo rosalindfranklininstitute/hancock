@@ -11,6 +11,8 @@ REFRESH_EXPIRES =  timedelta(days=30)
 class Config(object):
     # Flask
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    CORS_HEADERS = 'Content-Type'
+    CORS_RESOURCES = os.environ.get('CORS_RESOURCES')
 
 
     #JWT
