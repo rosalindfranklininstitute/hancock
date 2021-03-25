@@ -117,7 +117,7 @@ class ReceiveAsyncMessages(Resource):
                         obj = check_process_bucket_key(output[0])
                         S3Operations.client_options()
                         url = S3Operations.generate_presigned_url(Bucket=obj['bucket'], Key=obj['key'])
-                        url_ls.append(url[0])
+                        url_ls.append(url)
                     except Exception as e:
                         app.logger.debug(e)
                         continue
@@ -130,6 +130,7 @@ class ReceiveAsyncMessages(Resource):
             abort(406, "Cannot retrieve dataset list")
 
         try:
+            app.logger.info(url_ls)
             url_bytes_io = create_scicat_message(url_ls)
             app.logger.info('EMAIL created')
             SMTPConnect.send_email(payload["emailJobInitiator"], app.config['EMAIL_BODY_FILE'], url_string_io=url_bytes_io)
