@@ -47,4 +47,4 @@ class S3Operations:
                  app.logger.debug(e)
                  return {'presigned_url': None}, 404
 
-        return {'presigned_url': url_ls}
+        return {'presigned_url': url_ls}, 200
