@@ -14,7 +14,8 @@ TEST_USERNAME = "myservice1"
 TEST_PASSWORD = "weofnewofinoew"
 TEST_USERNAME2= "myservice2"
 TEST_PASSWORD2 = "sghiueswgeiwgh"
-# Add REST API endpoint for testing basic functionality
+
+# Add REST API endpoint for testing basic functionality and mocked routes for scicat
 
 @api.route('/protected')
 class Protected(Resource):
@@ -25,6 +26,38 @@ class Protected(Resource):
 
 def make_headers(jwt):
     return dict(Authorization='Bearer {}'.format(jwt))
+
+SCICAT_URL = app.config['SCICAT_URL']
+
+
+class MockResponse:
+    def __init__(self, json_data, status_code):
+        self.json_data = json_data
+        self.status_code = status_code
+
+    def json(self):
+        return self.json_data
+
+
+def mocked_requests_post(*args, **kwargs):
+
+    if args[0] == SCICAT_URL + 'Users/login':
+        return MockResponse({"id": "faketoken"}, 200)
+
+    return MockResponse(None, 404)
+
+
+def mocked_requests_get(*args, **kwargs):
+    if SCICAT_URL + 'Dataset' in args[0]:
+        if "my-fake-pid/123" in kwargs['params']['filter']:
+            return MockResponse(({"pid": "my-fake-pid/123'",
+                                 "sourceFolderHost": "https://rfi-test-bucket-abc.s3.amazonaws.com",
+                                 "sourceFolder": "myfileobj.txt"},200), 200)
+        else:
+            return MockResponse([], 200) # this mocks out what scicat gives back
+
+    return MockResponse(None, 404)
+
 
 
 class LoginTest(TestCase):
@@ -88,7 +121,11 @@ class RetrieveUrlTest(TestCase):
         creds = self.session.get_credentials()
         app.config['ACCESS_KEY'] = creds.access_key
         app.config['SECRET_ACCESS_KEY'] = creds.secret_key
+        app.config['EMAIL_BODY_FILE'] = "config/test_email_file.txt"
         self.client = app.test_client()
+
+        response = self.client.post('/api/token', json=dict(username=TEST_USERNAME2, password=TEST_PASSWORD2))
+        self.token = response.get_json()['access_token']
 
     def tearDown(self) -> None:
         self.conn.Object('rfi-test-bucket-abc', 'myfileobj.txt').delete()
@@ -106,7 +143,6 @@ class RetrieveUrlTest(TestCase):
                                     headers=make_headers(token))
 
         self.assertNotEqual(response.status_code, '200')
-        print(response.json)
         self.assertTrue('http' in response.json['presigned_url'])
 
     def test_successful_dir_retrieval(self):
@@ -138,33 +174,23 @@ class RetrieveUrlTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('http', response.json['presigned_url'])
 
-class MockResponse:
-            def __init__(self, json_data, status_code):
-                self.json_data = json_data
-                self.status_code = status_code
+    @patch('hancock.scicat_utils.requests.post', side_effect=mocked_requests_post)
+    @patch('hancock.scicat_utils.requests.get', side_effect=mocked_requests_get)
+    def test_receive_async_message(self,mock_post, mock_get):
+        payload = {"async_message":
+                  "{'emailJobInitiator':"
+                  "'thefranklin.development@gmail.com','datasetList':[{'pid':'my-fake-pid/123', 'files':{}}]}"}
+        r = self.client.post('/api/receive_async_messages', json=payload, headers=make_headers(self.token))
+        self.assertEqual(r.status_code, 200)
 
-            def json(self):
-                return self.json_data
-
-
-SCICAT_URL = app.config['SCICAT_URL']
-
-
-def mocked_requests_post(*args, **kwargs):
-    if args[0] == SCICAT_URL + 'Users/login':
-        return MockResponse({"id": "faketoken"}, 200)
-
-    return MockResponse(None, 404)
-
-
-def mocked_requests_get(*args, **kwargs):
-    if SCICAT_URL + 'Dataset' in args[0]:
-        return MockResponse({"pid": "my-fake-pid/123'",
-                             "sourceFolderHost": "s3.myfakebucket.somecloud.org",
-                             "sourceFolder": "myfile.txt"}, 200)
-
-    return MockResponse(None, 404)
-
+    @patch('hancock.scicat_utils.requests.post', side_effect=mocked_requests_post)
+    @patch('hancock.scicat_utils.requests.get', side_effect=mocked_requests_get)
+    def test_error_routes_receive_async_message(self, mock_get, mock_post):
+        fake_payload = {"async_message":
+                       "{'emailJobInitiator':"
+                       "'thefranklin.development@gmail.com','datasetList':[{'pid':'no-record', 'files':{}}]}"}
+        r = self.client.post('/api/receive_async_messages', json=fake_payload, headers=make_headers(self.token))
+        self.assertEqual(r.status_code, 406)
 
 class ScicatUtilsTest(TestCase):
     def setUp(self):
@@ -174,9 +200,9 @@ class ScicatUtilsTest(TestCase):
     @patch('hancock.scicat_utils.requests.get', side_effect=mocked_requests_get)
     def test_get_associated_payload(self, mock_post, mock_get):
         r = get_associated_payload(self.pid)
-        self.assertIn('pid', r.keys())
-        self.assertIn('sourceFolderHost', r.keys())
-        self.assertIn('sourceFolder', r.keys())
+        self.assertIn('pid', r[0].keys())
+        self.assertIn('sourceFolderHost', r[0].keys())
+        self.assertIn('sourceFolder', r[0].keys())
 
 
     def test_create_message(self):

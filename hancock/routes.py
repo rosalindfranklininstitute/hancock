@@ -104,14 +104,16 @@ class ReceiveAsyncMessages(Resource):
             dataset_list = payload["datasetList"]
         except (SyntaxError, ValueError) as e:
             app.logger.debug(e)
-            abort(401, "Invalid Message")
+            abort(406, "Invalid Message")
 
         if dataset_list:
             output_ls = [get_associated_payload(item['pid']) for item in dataset_list]
-
             url_ls = []
-            app.logger.info('retrieving presigned url list')
-            if output_ls:
+            app.logger.info('retrieving presigned-url list')
+            if not any(output_ls):
+                SMTPConnect.send_error_email(payload["emailJobInitiator"])
+                abort(406, "Failed to retrieve dataset information")
+            else:
                 for output in output_ls:
                     try:
                         obj = check_process_bucket_key(output[0])
@@ -123,10 +125,13 @@ class ReceiveAsyncMessages(Resource):
                         continue
                     else:
                         if not url_ls:
+                            SMTPConnect.send_error_email(payload["emailJobInitiator"])
                             abort(406, "Failed to retrieve pre-signed url")
-            else:
-                abort(406, "Failed to retrieve dataset information")
+
+
+
         else:
+            SMTPConnect.send_error_email(payload["emailJobInitiator"])
             abort(406, "Cannot retrieve dataset list")
 
         try:

@@ -30,10 +30,16 @@ class SMTPConnect:
         server = cls.connect_to_smtp()
         server.sendmail(from_addr=app.config['SMTP_SENDER_EMAIL'], to_addrs=to_address, msg=message)
 
+    @classmethod
+    def send_error_email(cls, to_address, main_body_file=None,  attachment_bytes=None):
+        message = "The job has failed. We are working on it. Best Regards Hancock Service"
+        server = cls.connect_to_smtp()
+        server.sendmail(from_addr=app.config['SMTP_SENDER_EMAIL'], to_addrs=to_address, msg=message)
+
 
 def create_email(to_address, main_body_file=None,  attachment_bytes=None):
     subject = "Batch Data Retrieve Job"
-    default_message ="This message is sent from hancock. If you have received this in error please ignore"
+    default_message ="This message is sent from hancock. If you have received this in error please ignore."
     if not main_body_file:
         main_body = default_message
     else:
@@ -83,6 +89,8 @@ def create_email(to_address, main_body_file=None,  attachment_bytes=None):
     else:
         app.logger.info('no attachment specified')
     return message.as_string()
+
+
 
 
 

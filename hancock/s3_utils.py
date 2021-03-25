@@ -31,20 +31,25 @@ class S3Operations:
             bucket = s3.Bucket(Bucket)
             objs = bucket.objects.filter(Prefix=Key)
 
+
         except ClientError as e:
              app.logger.debug(e)
-             return {'presigned_url': None}, 404
+             return None, 404
 
         try:
             url_ls =[]
             for obj in objs.all():
-                app.logger.info(obj.key)
+                app.logger.info(obj)
                 url_ls.append(s3.meta.client.generate_presigned_url('get_object',
                                                             Params={'Bucket': Bucket,
                                                                     'Key': obj.key},
                                                             ExpiresIn=Expiration))
         except ClientError as e:
                  app.logger.debug(e)
-                 return {'presigned_url': None}, 404
+                 return None, 404
+
+        if not url_ls:
+            app.logger.debug('URL Not returned')
+            return None, 404
 
         return {'presigned_url': url_ls}, 200
