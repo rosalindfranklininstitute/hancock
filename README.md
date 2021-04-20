@@ -31,3 +31,4 @@ Structure should look like:
 {"myservice1":"servicepassword",
 "myservice2":"servicespassword2"}
 ```
+Please remember to set up a redis services in docker before running the app!
